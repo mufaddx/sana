@@ -1,0 +1,2244 @@
+MASTER PROJECT PROMPT
+REAL WORLD LINK — COMPLETE PUBLIC WEBSITE
+
+============================================================
+IMPORTANT: READ BEFORE CODING
+============================================================
+
+I am providing an existing HTML file for the REAL WORLD LINK project.
+
+FIRST, carefully inspect and understand the existing HTML file.
+
+Use the existing HTML as the SOURCE FOUNDATION for:
+
+- Existing brand concept
+- Existing terminology
+- Existing career categories
+- Existing stream selection
+- Existing assessment structure
+- Existing question concepts
+- Existing career mapping
+- Existing scoring logic
+
+DO NOT silently replace the original concept with a generic career website.
+
+Improve and professionally redesign it.
+
+However, this development phase is ONLY for the PUBLIC WEBSITE.
+
+============================================================
+STRICT SCOPE
+============================================================
+
+BUILD ONLY:
+
+1. Public Landing Page
+2. Public Website Sections
+3. Career Fields
+4. About / Team
+5. FAQ
+6. Contact
+7. Student Assessment
+8. 20-question branching assessment
+9. Career scoring
+10. Result page
+11. Thank-you page
+12. Email confirmation
+13. Privacy Policy
+14. Terms & Conditions
+15. Responsive mobile/desktop UI
+16. Professional animations and interactions
+
+DO NOT BUILD:
+
+- Admin Panel
+- Super Admin Panel
+- Admin Login
+- Admin Dashboard
+- Admin PIN
+- Student Dashboard
+- Student Login
+- OTP
+- SMS OTP
+- Email OTP
+- Phone verification
+- Document upload
+- File upload
+- Delivery tracking
+- Linking Box tracking
+- Admin management system
+
+The Admin Panel will be developed separately later.
+
+IMPORTANT:
+
+Even though Admin Panel is not being built now, structure the database and code so a future Super Admin Panel can connect to the same system without rebuilding the public website.
+
+============================================================
+1. BRAND
+============================================================
+
+Brand:
+
+REAL WORLD LINK
+
+Sub-brand:
+
+In Shorts by Aafiya & Sana
+
+Main tagline:
+
+“Discover Your Potential. Find Your Path.”
+
+Website purpose:
+
+A professional student career-discovery platform that helps students explore their interests and understand which career fields may align with their responses.
+
+Do NOT claim that the assessment guarantees a career.
+
+Use language such as:
+
+“Best-fit career field”
+“Based on your responses”
+“Career exploration”
+“Possible career direction”
+
+============================================================
+2. TECHNOLOGY
+============================================================
+
+Build the website using:
+
+- PHP 8+
+- MySQL-ready architecture
+- HTML5
+- CSS3
+- Vanilla JavaScript
+- PDO
+- Modular PHP
+- Responsive CSS
+- Lightweight JavaScript
+
+Target hosting:
+
+HOSTINGER
+
+Database:
+
+MYSQL
+
+Do not use unnecessary frameworks.
+
+Do not create a complicated frontend framework.
+
+Keep the website lightweight and easy to deploy.
+
+============================================================
+3. DESIGN PHILOSOPHY
+============================================================
+
+The entire website must look like a PREMIUM modern EdTech startup.
+
+LIGHT THEME ONLY.
+
+Primary palette:
+
+White
+Off-white
+Very light blue
+Soft lavender
+Soft grey
+Dark navy
+Professional blue
+Subtle purple
+
+The website must feel:
+
+- Premium
+- Modern
+- Clean
+- Trustworthy
+- Educational
+- Student-friendly
+- Professional
+- High quality
+
+Visual inspiration:
+
+Modern EdTech
++
+Premium SaaS
++
+Career discovery platform
++
+Modern startup
+
+DO NOT create:
+
+- Dark theme
+- Neon UI
+- Gaming interface
+- Excessive glassmorphism
+- Excessive gradients
+- Random blobs everywhere
+- Cheap template-looking cards
+- Fake statistics
+- Fake testimonials
+- Fake achievements
+
+============================================================
+4. FONT SYSTEM
+============================================================
+
+Use ONE primary font family throughout the website.
+
+PRIMARY FONT:
+
+MANROPE
+
+Use:
+
+400 — body text
+500 — navigation / supporting text
+600 — buttons / cards
+700 — headings
+800 — hero/display headings
+
+Fallback:
+
+Manrope,
+Inter,
+system-ui,
+sans-serif
+
+Load only the required font weights.
+
+Use:
+
+font-display: swap;
+
+Typography must be consistent across every section.
+
+============================================================
+5. TYPOGRAPHY SCALE
+============================================================
+
+Desktop:
+
+Hero H1:
+clamp(42px, 5vw, 72px)
+
+Section H2:
+clamp(32px, 4vw, 48px)
+
+Card H3:
+22–28px
+
+Body:
+16–18px
+
+Small text:
+13–15px
+
+Mobile:
+
+Hero:
+36–44px
+
+Section H2:
+28–34px
+
+Card H3:
+20–23px
+
+Body:
+15–17px
+
+Assessment question:
+22–28px mobile
+
+Assessment answer:
+16px minimum
+
+Never make body text too small.
+
+============================================================
+6. ICON SYSTEM
+============================================================
+
+Use ONE consistent professional icon library.
+
+Preferred:
+
+LUCIDE ICONS
+
+Do NOT mix random icon libraries.
+
+Do NOT use emoji as the main UI icon system.
+
+Use consistent:
+
+- stroke width
+- size
+- alignment
+- visual weight
+
+Examples:
+
+GraduationCap
+FlaskConical
+Microscope
+Cpu
+Bot
+BriefcaseBusiness
+Calculator
+ChartNoAxesCombined
+Brain
+Globe
+Landmark
+ClipboardCheck
+Mail
+MapPin
+CircleCheck
+ArrowRight
+ArrowLeft
+Menu
+X
+ChevronDown
+ArrowUp
+
+Icons should support the content, not decorate every sentence.
+
+============================================================
+7. PHOTO VS ICON RULE
+============================================================
+
+Do not force photography into every section.
+
+Use REAL PHOTOGRAPHY when it adds emotional or contextual value.
+
+Use PROFESSIONAL ICONS when photography is unnecessary.
+
+Recommended:
+
+Hero:
+REAL PHOTO
+
+Career Fields:
+PHOTO OR strong visual
+
+How It Works:
+ICONS
+
+Why Real World Link:
+ICONS
+
+Assessment:
+ICONS
+
+FAQ:
+ICONS optional
+
+Contact:
+ICONS
+
+Success:
+ICON
+
+This keeps the website premium and uncluttered.
+
+============================================================
+8. IMAGE RESEARCH
+============================================================
+
+Use realistic, relevant professional photography.
+
+Research the visual context of each career field before selecting images.
+
+Do NOT randomly pick unrelated stock photos.
+
+Preferred image qualities:
+
+- Realistic
+- Professional
+- Bright
+- Natural
+- Modern
+- Education/career related
+- Consistent lighting
+- Consistent visual style
+
+Do not use watermarked images.
+
+Do not use images with unclear commercial usage rights.
+
+If external image licensing is uncertain, use a properly licensed alternative or an original/generated image.
+
+============================================================
+9. IMAGE FILES
+============================================================
+
+Create replaceable local assets:
+
+/assets/images/hero-student.jpg
+
+/assets/images/about.jpg
+
+/assets/images/career-science.png
+
+/assets/images/career-technology.png
+
+/assets/images/career-commerce.png
+
+/assets/images/career-humanities.png
+
+/assets/images/aafiya.jpg
+
+/assets/images/sana.jpg
+
+Career card images:
+
+560 × 315 px
+
+16:9
+
+NO text inside images.
+
+NO logo.
+
+NO watermark.
+
+============================================================
+10. WEBSITE OPENING ANIMATION
+============================================================
+
+When the domain is opened:
+
+Do NOT immediately show a form.
+
+Show a premium brand introduction.
+
+Sequence:
+
+REAL WORLD LINK
+
+↓
+
+IN SHORTS BY AAFIYA & SANA
+
+↓
+
+Welcome, Student 👋
+
+↓
+
+Discover Your Potential.
+Find Your Path.
+
+Then smoothly transition to homepage.
+
+Animation:
+
+- Fade
+- Slight upward movement
+- Very subtle scale
+- Smooth easing
+
+Duration:
+
+1.5–2.5 seconds maximum.
+
+Do not make the user wait.
+
+If:
+
+prefers-reduced-motion
+
+is enabled:
+
+Use minimal/no intro motion.
+
+============================================================
+11. PAGE LOAD ANIMATION
+============================================================
+
+Hero should reveal in sequence:
+
+Badge
+↓
+Heading
+↓
+Description
+↓
+Primary CTA
+↓
+Secondary CTA
+↓
+Image
+
+Use subtle staggered animation.
+
+Do not make animations slow.
+
+============================================================
+12. GLOBAL ANIMATION SYSTEM
+============================================================
+
+The website must NOT feel static.
+
+But:
+
+Premium animation ≠ animation everywhere.
+
+Use professional micro-interactions.
+
+Use:
+
+- fade
+- slide
+- scale
+- subtle lift
+- image zoom
+- hover transitions
+- scroll reveal
+- modal transitions
+- progress animation
+- success animation
+
+Animation duration:
+
+150–400ms for normal UI.
+
+Avoid:
+
+- bouncing
+- flashing
+- shaking
+- spinning
+- excessive parallax
+- giant cursor effects
+- infinite aggressive animation
+
+============================================================
+13. DESKTOP HOVER INTERACTIONS
+============================================================
+
+For devices supporting hover:
+
+Buttons:
+
+- slight lift
+- subtle shadow
+- arrow movement
+- background transition
+
+Career cards:
+
+- translateY(-4px to -6px)
+- subtle shadow
+- image scale 1.02–1.04
+- arrow movement
+
+Navigation:
+
+- subtle animated underline
+
+Images:
+
+- subtle zoom inside overflow-hidden container
+
+All transitions should feel premium.
+
+============================================================
+14. MOBILE INTERACTIONS
+============================================================
+
+Mobile has no mouse.
+
+Therefore do NOT rely on hover.
+
+Use:
+
+- active states
+- pressed states
+- tap feedback
+- smooth menus
+- scroll reveal
+
+Do not use desktop hover effects as essential functionality.
+
+============================================================
+15. HEADER — DESKTOP
+============================================================
+
+Create sticky header.
+
+LEFT:
+
+REAL WORLD LINK
+
+Small subtext:
+
+IN SHORTS BY AAFIYA & SANA
+
+NAVIGATION:
+
+Home
+How It Works
+Career Fields
+About
+FAQ
+Contact
+
+RIGHT:
+
+Start Assessment →
+
+Header:
+
+- white
+- subtle border
+- backdrop blur
+- smooth shadow when scrolling
+- professional spacing
+
+============================================================
+16. HEADER — MOBILE
+============================================================
+
+Mobile must be designed independently.
+
+Do NOT simply shrink desktop.
+
+Header:
+
+LEFT:
+REAL WORLD LINK
+
+RIGHT:
+Menu icon
+
+Use Lucide Menu icon.
+
+On click:
+
+Open a professional mobile navigation.
+
+Menu:
+
+Home
+How It Works
+Career Fields
+About
+FAQ
+Contact
+
+Start Assessment →
+
+Optional:
+
+Privacy Policy
+Terms
+
+Animation:
+
+fade + slide
+
+Prevent background scrolling while menu is open.
+
+Close when:
+
+- X clicked
+- outside clicked
+- navigation selected
+
+============================================================
+17. HERO SECTION
+============================================================
+
+Hero is the most important section.
+
+Desktop:
+
+Two-column layout.
+
+LEFT:
+
+Badge:
+
+CAREER DISCOVERY FOR STUDENTS
+
+Heading:
+
+“Discover Your Potential.
+Find Your Path.”
+
+Highlight:
+
+“Find Your Path.”
+
+Description:
+
+“Explore your interests, understand your strengths and discover career fields that may be a strong fit for you.”
+
+Primary:
+
+Start Your Assessment →
+
+Secondary:
+
+Explore Career Fields
+
+RIGHT:
+
+Professional student image.
+
+Use:
+
+/assets/images/hero-student.jpg
+
+Image:
+
+- bright
+- realistic
+- premium
+- educational
+- aspirational
+- natural
+
+NO text inside image.
+
+============================================================
+18. HERO MOBILE
+============================================================
+
+Mobile order:
+
+Badge
+↓
+Heading
+↓
+Description
+↓
+Primary CTA
+↓
+Secondary CTA
+↓
+Hero image
+
+Horizontal padding:
+
+16–20px.
+
+Hero buttons:
+
+50–56px height.
+
+Image:
+
+rounded
+responsive
+no distortion
+no face cropping
+
+============================================================
+19. HERO FLOATING UI
+============================================================
+
+Optional subtle floating card:
+
+Career Discovery
+
+Based on Your Interests
+
+Use only if it improves the design.
+
+No fake statistics.
+
+No fake numbers.
+
+Very subtle floating animation.
+
+============================================================
+20. VALUE STRIP
+============================================================
+
+Below hero:
+
+Student-Focused
+Career Exploration
+Simple Assessment
+Future-Oriented
+
+Use Lucide icons.
+
+Keep compact.
+
+============================================================
+21. WHAT IS REAL WORLD LINK
+============================================================
+
+Heading:
+
+“What is Real World Link?”
+
+Main message:
+
+“Choosing a career starts with understanding yourself.”
+
+Explain that the platform connects:
+
+Interests
+Strengths
+Subjects
+Career fields
+Real-world possibilities
+
+Layout:
+
+Desktop:
+Text + image
+
+Mobile:
+Text + image
+
+Image:
+
+/assets/images/about.jpg
+
+============================================================
+22. HOW IT WORKS
+============================================================
+
+Create a four-step professional timeline.
+
+01
+DISCOVER YOURSELF
+
+Understand your interests and preferences.
+
+02
+TAKE THE ASSESSMENT
+
+Answer simple career-discovery questions.
+
+03
+EXPLORE YOUR FIT
+
+Discover career fields that may align with your responses.
+
+04
+CONNECT WITH OUR TEAM
+
+After submission, the team can connect with you.
+
+Desktop:
+
+Horizontal timeline.
+
+Mobile:
+
+Vertical timeline.
+
+Use Lucide icons.
+
+============================================================
+23. CAREER FIELDS
+============================================================
+
+Use the career structure from the existing HTML.
+
+FOUR MAIN FIELDS:
+
+SCIENCE & HEALTHCARE
+
+- Forensic Science
+- Medicine & Pathology
+- Biotechnology & Research
+
+ENGINEERING & TECHNOLOGY
+
+- AI & Robotics Engineering
+- Architecture & Spatial Design
+- Physical Research & Engineering
+
+COMMERCE & BUSINESS
+
+- Chartered Accountancy
+- Business & Entrepreneurship
+- Financial Analytics
+
+HUMANITIES & SOCIAL SCIENCES
+
+- Psychology & Behavioral Science
+- IAS & Public Policy
+- Political Science & Geography
+
+Do not replace these with unrelated categories.
+
+============================================================
+24. CAREER CARD IMAGES
+============================================================
+
+SCIENCE:
+
+career-science.png
+
+Visual:
+
+Realistic student/scientist in bright laboratory.
+
+Technology:
+
+career-technology.png
+
+Visual:
+
+Student/engineer working with robotics, electronics or technology.
+
+Commerce:
+
+career-commerce.png
+
+Visual:
+
+Student/business environment with finance/business context.
+
+Humanities:
+
+career-humanities.png
+
+Visual:
+
+Student/research environment related to psychology, geography, public policy or social sciences.
+
+All:
+
+560 × 315
+16:9
+No text
+No watermark
+No logo
+
+============================================================
+25. CAREER CARD DESIGN
+============================================================
+
+Each card:
+
+Image
+Category
+Heading
+Short description
+Career tags
+Explore Field →
+
+Hover:
+
+- subtle lift
+- image zoom
+- shadow
+- arrow movement
+
+Mobile:
+
+one-column cards.
+
+Do NOT create tiny two-column cards on mobile.
+
+============================================================
+26. CAREER DETAIL MODAL
+============================================================
+
+Explore Field →
+
+opens modal.
+
+Modal:
+
+Category
+Description
+Career examples
+Potential interests
+Take Assessment →
+
+Desktop:
+
+Centered modal.
+
+Mobile:
+
+Full-screen/bottom-sheet style.
+
+Animation:
+
+fade backdrop
++
+scale 96% → 100%
+
+Close button:
+
+Lucide X
+
+============================================================
+27. WHY REAL WORLD LINK
+============================================================
+
+Heading:
+
+“Why Start With Yourself?”
+
+Cards:
+
+Understand Your Interests
+
+Explore Career Possibilities
+
+Make Better-Informed Choices
+
+Discover New Directions
+
+Use professional icons.
+
+============================================================
+28. STUDENT JOURNEY
+============================================================
+
+Create:
+
+Curiosity
+↓
+Assessment
+↓
+Discovery
+↓
+Direction
+↓
+Next Step
+
+Desktop:
+
+Horizontal.
+
+Mobile:
+
+Vertical.
+
+============================================================
+29. ASSESSMENT CTA
+============================================================
+
+Large premium CTA section.
+
+Heading:
+
+“Not Sure Where Your Interests Can Take You?”
+
+Description:
+
+“Take a few minutes to explore which career field may align with your interests.”
+
+Button:
+
+Start My Assessment →
+
+Use very light blue/lavender background.
+
+============================================================
+30. ABOUT / TEAM
+============================================================
+
+Heading:
+
+“Meet the Team Behind Real World Link”
+
+Team:
+
+Aafiya
+Lead Mentor
+
+Sana
+Lead Mentor
+
+Images:
+
+/assets/images/aafiya.jpg
+/assets/images/sana.jpg
+
+Do NOT invent:
+
+- degrees
+- certifications
+- awards
+- companies
+- achievements
+- biographies
+
+Use editable short bios.
+
+============================================================
+31. NO FAKE TESTIMONIALS
+============================================================
+
+Do not create fake reviews.
+
+If actual testimonials are not provided:
+
+Do not show testimonial cards.
+
+============================================================
+32. FAQ
+============================================================
+
+Create functional accordion.
+
+Questions:
+
+What is Real World Link?
+
+Who can take the assessment?
+
+How long does the assessment take?
+
+How does the assessment work?
+
+How is the best-fit field selected?
+
+Is the result guaranteed?
+
+What happens after submission?
+
+Is my information safe?
+
+Use smooth open/close animation.
+
+============================================================
+33. CONTACT
+============================================================
+
+Heading:
+
+“Have a Question?”
+
+Fields:
+
+Name
+Email
+Subject
+Message
+
+Button:
+
+Send Message
+
+Success:
+
+“Thank you. Your message has been received.”
+
+No OTP.
+
+No phone verification.
+
+============================================================
+34. ASSESSMENT INTRO
+============================================================
+
+When user clicks:
+
+Start Assessment →
+
+Show:
+
+Welcome, Student 👋
+
+“Let’s discover what interests you.”
+
+Show:
+
+20 Questions
+5–8 Minutes
+Multiple Choice
+
+Button:
+
+Start Assessment →
+
+============================================================
+35. STUDENT INFORMATION
+============================================================
+
+Collect:
+
+Full Name *
+Email Address *
+Class / Grade *
+City *
+School / Institution optional
+
+NO:
+
+Phone
+OTP
+Documents
+File upload
+
+Checkbox:
+
+“I understand that this assessment is for career exploration and does not guarantee a specific career outcome.”
+
+Continue →
+
+============================================================
+36. ASSESSMENT LOGIC
+============================================================
+
+The existing HTML contains a branching assessment.
+
+Preserve that concept.
+
+Current concept:
+
+Question 1 of 15
+
+First selection:
+
+PCB
+PCM
+Commerce
+Humanities
+
+Upgrade to:
+
+20 questions total.
+
+Q1:
+
+Stream / broad interest selection.
+
+Q2–Q20:
+
+Branch-specific questions.
+
+PCB:
+
+Q2–Q20 = PCB questions
+
+PCM:
+
+Q2–Q20 = PCM questions
+
+Commerce:
+
+Q2–Q20 = Commerce questions
+
+Humanities:
+
+Q2–Q20 = Humanities questions
+
+NEVER MIX STREAM QUESTIONS.
+
+============================================================
+37. ORIGINAL QUESTION CONCEPT
+============================================================
+
+Use the existing HTML questions as the foundation.
+
+Do not replace them with unrelated generic questions.
+
+PCB concepts include:
+
+- forensic investigation
+- medicine
+- biotechnology
+- laboratory work
+- scientific evidence
+- medical diagnosis
+- research
+- scientific equipment
+- ethics
+- scientific subjects
+
+PCM concepts include:
+
+- AI
+- robotics
+- sensors
+- microcontrollers
+- architecture
+- physics
+- engineering
+- energy
+- algorithms
+- research
+- design
+
+Commerce concepts include:
+
+- accounting
+- CA
+- audit
+- taxation
+- business
+- entrepreneurship
+- financial markets
+- investment
+- financial modelling
+- risk
+- leadership
+
+Humanities concepts include:
+
+- psychology
+- human behaviour
+- IAS
+- public policy
+- government
+- political science
+- geography
+- GIS
+- international relations
+- public administration
+- social issues
+
+Preserve the original meaning while improving wording and UX.
+
+============================================================
+38. QUESTION UI
+============================================================
+
+ONE QUESTION AT A TIME.
+
+Top:
+
+Career Discovery Assessment
+
+Question 4 of 20
+
+Progress bar
+
+Question
+
+Answer cards
+
+Bottom:
+
+← Previous
+
+Next →
+
+Answer card:
+
+Icon
++
+Text
+
+Selected:
+
+Check icon
++
+highlighted border
++
+soft background
+
+No tiny radio buttons.
+
+============================================================
+39. QUESTION NAVIGATION
+============================================================
+
+Next disabled until answer selected.
+
+Previous always works after first question.
+
+Answers must remain saved.
+
+No answer loss.
+
+Transition:
+
+250–400ms.
+
+Next:
+
+slide/fade from right.
+
+Previous:
+
+slide/fade from left.
+
+============================================================
+40. PROGRESS
+============================================================
+
+Show:
+
+Question 8 of 20
+
+40% Complete
+
+Animated progress bar.
+
+============================================================
+41. FINAL REVIEW
+============================================================
+
+At Q20:
+
+Review & Submit
+
+Show:
+
+Assessment Complete
+
+20 / 20 Questions Answered
+
+Student Name
+Email
+Selected Stream
+
+Buttons:
+
+Review Answers
+
+Submit Assessment →
+
+============================================================
+42. SCORING
+============================================================
+
+Each answer must map internally to a career.
+
+Example:
+
+{
+ id: "pcb_01_a",
+ text: "...",
+ career: "Forensic Science",
+ score: 1
+}
+
+At completion:
+
+Calculate career scores.
+
+Do not show raw scoring.
+
+Show strongest career.
+
+If appropriate:
+
+Secondary possible field.
+
+Never guarantee a career.
+
+============================================================
+43. ANALYSIS ANIMATION
+============================================================
+
+After submit:
+
+Analyzing Your Responses…
+
+↓
+
+Understanding Your Interests…
+
+↓
+
+Finding Your Best-Fit Career Field…
+
+Keep total animation short.
+
+Do not claim actual AI analysis unless an actual AI API is connected.
+
+============================================================
+44. RESULT PAGE
+============================================================
+
+Heading:
+
+“Your Best-Fit Career Field”
+
+Example:
+
+Forensic Science
+
+Text:
+
+“Based on your responses, this field appears to be a strong match for your interests.”
+
+Section:
+
+Why This May Fit You
+
+3–4 points.
+
+Buttons:
+
+Explore This Field
+
+Back to Home
+
+============================================================
+45. THANK-YOU PAGE
+============================================================
+
+Animated checkmark.
+
+Heading:
+
+“Thank You!”
+
+Text:
+
+“Your assessment has been submitted successfully.”
+
+Then:
+
+“Our team has received your response and will connect with you soon.”
+
+Then:
+
+“A confirmation message has also been sent to your email address.”
+
+Buttons:
+
+Back to Home
+
+Explore Career Fields
+
+============================================================
+46. EMAIL CONFIRMATION
+============================================================
+
+After successful submission:
+
+Send email to student's entered email.
+
+Subject:
+
+Thank You for Submitting Your Assessment – Real World Link
+
+Body:
+
+Hi [Student Name],
+
+Thank you for completing the Real World Link assessment.
+
+Your response has been successfully submitted.
+
+Our team will review your information and connect with you soon.
+
+Thank you for choosing Real World Link.
+
+Regards,
+Real World Link
+In Shorts by Aafiya & Sana
+
+Create reusable mail module.
+
+NO OTP.
+
+============================================================
+47. FOOTER
+============================================================
+
+Professional footer.
+
+Brand:
+
+REAL WORLD LINK
+
+In Shorts by Aafiya & Sana
+
+Description.
+
+EXPLORE:
+
+Home
+How It Works
+Career Fields
+Assessment
+
+COMPANY:
+
+About
+Team
+FAQ
+Contact
+
+LEGAL:
+
+Privacy Policy
+Terms & Conditions
+
+Bottom:
+
+© 2026 Real World Link
+All Rights Reserved.
+
+Social icons ONLY if real URLs are provided.
+
+============================================================
+48. MOBILE FOOTER
+============================================================
+
+Do NOT squeeze desktop footer into mobile.
+
+Use:
+
+Brand
+Description
+
+EXPLORE ▾
+
+COMPANY ▾
+
+LEGAL ▾
+
+Expandable accordions.
+
+============================================================
+49. FLOATING MOBILE CTA
+============================================================
+
+After scrolling beyond hero:
+
+Mobile only:
+
+Start Assessment →
+
+Floating bottom CTA.
+
+Do not show it during assessment.
+
+Do not cover important content.
+
+Allow close.
+
+============================================================
+50. BACK TO TOP
+============================================================
+
+Floating circular button:
+
+↑
+
+Appears after scrolling.
+
+Smooth scroll to top.
+
+============================================================
+51. RESPONSIVE DESIGN
+============================================================
+
+Mobile-first.
+
+Test:
+
+360
+375
+390
+414
+430
+768
+820
+1024
+1280
+1440
+1600
+
+NO:
+
+horizontal scrolling
+text clipping
+overlapping
+broken cards
+tiny buttons
+tiny icons
+
+Mobile must look as professional as desktop.
+
+============================================================
+52. MOBILE LAYOUT
+============================================================
+
+Mobile order:
+
+Header
+Hero
+Value Strip
+What Is Real World Link
+How It Works
+Career Fields
+Why Real World Link
+Student Journey
+Assessment CTA
+Team
+FAQ
+Contact
+Footer
+
+============================================================
+53. MOBILE ASSESSMENT
+============================================================
+
+This must be extremely polished.
+
+Question:
+
+22–28px
+
+Answers:
+
+16px minimum
+
+Touch target:
+
+44px+
+
+Bottom navigation:
+
+Previous
+Next
+
+Support safe-area:
+
+env(safe-area-inset-bottom)
+
+No excessive scrolling.
+
+============================================================
+54. MOBILE MENU
+============================================================
+
+Menu animation:
+
+fade + slide
+
+Menu items stagger 50–80ms.
+
+Close:
+
+X icon
+
+Prevent background scrolling.
+
+============================================================
+55. MOBILE ANIMATION
+============================================================
+
+Use lighter animations on mobile.
+
+Do NOT use:
+
+- cursor effects
+- magnetic buttons
+- heavy parallax
+- hover-only interactions
+
+Use:
+
+fade
+slide
+scale
+tap feedback
+scroll reveal
+
+============================================================
+56. DESKTOP HOVER
+============================================================
+
+Only on devices supporting hover.
+
+Buttons:
+
+lift + shadow + arrow movement.
+
+Cards:
+
+lift + subtle image zoom.
+
+Navigation:
+
+animated underline.
+
+Never make hover necessary for functionality.
+
+============================================================
+57. ACCESSIBILITY
+============================================================
+
+Use:
+
+semantic HTML
+proper labels
+ARIA labels
+keyboard navigation
+visible focus
+good contrast
+alt text
+touch targets
+
+Respect:
+
+prefers-reduced-motion
+
+When reduced motion is enabled:
+
+disable/reduce unnecessary animation.
+
+============================================================
+58. PERFORMANCE
+============================================================
+
+Optimize:
+
+Images
+CSS
+JavaScript
+
+Use:
+
+lazy loading below fold
+
+Use WebP/AVIF where practical.
+
+Do not lazy-load the hero if it causes visible delay.
+
+No unnecessary libraries.
+
+No heavy animation libraries.
+
+============================================================
+59. SEO
+============================================================
+
+Homepage title:
+
+Real World Link | Discover Your Potential. Find Your Path.
+
+Meta description:
+
+“Explore your interests, discover career fields and take a student-focused career assessment with Real World Link.”
+
+Add:
+
+Open Graph
+Twitter Card
+Canonical
+robots.txt
+sitemap.xml
+
+Use proper:
+
+H1
+H2
+H3
+
+============================================================
+60. PRIVACY POLICY
+============================================================
+
+Create:
+
+privacy.php
+
+Include:
+
+Data collected
+Purpose
+Assessment responses
+Email
+Data security
+Data retention
+Contact
+Deletion requests
+
+Do not invent legal compliance claims.
+
+Because students may be minors, structure it for later legal review.
+
+============================================================
+61. TERMS
+============================================================
+
+Create:
+
+terms.php
+
+Include:
+
+Platform use
+Assessment nature
+Career exploration disclaimer
+No guarantee
+User responsibilities
+Contact
+
+============================================================
+62. 404
+============================================================
+
+Create:
+
+404.php
+
+Heading:
+
+“Looks like this path doesn’t exist.”
+
+Button:
+
+Back to Home
+
+============================================================
+63. DATABASE READY
+============================================================
+
+Prepare for MySQL.
+
+Future tables:
+
+students
+assessment_questions
+question_options
+career_fields
+assessment_answers
+assessment_results
+contact_messages
+email_logs
+
+Use PDO.
+
+Use prepared statements.
+
+Never expose credentials.
+
+============================================================
+64. FUTURE ADMIN COMPATIBILITY
+============================================================
+
+Do not build Admin Panel.
+
+But make assessment data structured.
+
+Question:
+
+id
+stream
+question
+options
+
+Option:
+
+id
+text
+career
+score
+
+Future Admin Panel will eventually manage:
+
+Students
+Questions
+Options
+Career Fields
+Scores
+Results
+Contact Messages
+Email Templates
+Website Content
+
+============================================================
+65. ORIGINAL HTML FEATURES TO REMOVE
+============================================================
+
+The original HTML may contain:
+
+Dashboard
+Community
+Admin Portal
+Admin PIN
+Admin control center
+Linking Box
+Delivery
+Tracking
+Assigned Expert
+
+Do not expose these in the new public website.
+
+Public navigation:
+
+Home
+How It Works
+Career Fields
+About
+FAQ
+Contact
+Start Assessment
+
+============================================================
+66. NO OTP
+============================================================
+
+Absolutely no:
+
+SMS OTP
+Email OTP
+Phone verification
+OTP popup
+
+============================================================
+67. NO FILE UPLOAD
+============================================================
+
+Absolutely no:
+
+PDF
+Image
+Certificate
+School document
+ID upload
+
+============================================================
+68. FINAL FILE STRUCTURE
+============================================================
+
+/
+
+index.php
+assessment.php
+result.php
+thank-you.php
+contact.php
+privacy.php
+terms.php
+404.php
+
+/assets/
+    /css/
+        main.css
+        responsive.css
+        animations.css
+
+    /js/
+        main.js
+        navigation.js
+        assessment.js
+        validation.js
+
+    /images/
+        hero-student.jpg
+        about.jpg
+        career-science.png
+        career-technology.png
+        career-commerce.png
+        career-humanities.png
+        aafiya.jpg
+        sana.jpg
+
+/includes/
+    header.php
+    footer.php
+    helpers.php
+    mail.php
+
+/config/
+    config.php
+    database.php
+
+/api/
+    submit-assessment.php
+    contact.php
+    send-email.php
+
+robots.txt
+sitemap.xml
+
+============================================================
+69. DESIGN SYSTEM
+============================================================
+
+Create CSS variables:
+
+--color-primary
+--color-primary-dark
+--color-background
+--color-surface
+--color-text
+--color-text-muted
+--color-border
+
+--radius-sm
+--radius-md
+--radius-lg
+--radius-xl
+
+--shadow-sm
+--shadow-md
+--shadow-lg
+
+--container-width
+--section-spacing
+
+Use one consistent design system throughout the entire website.
+
+============================================================
+70. QUALITY STANDARD
+============================================================
+
+This should NOT look like:
+
+“AI generated HTML.”
+
+It must look like:
+
+A REAL PROFESSIONAL EDTECH STARTUP.
+
+Required:
+
+High-quality UI
+High-quality UX
+Premium mobile UI
+Premium desktop UI
+Consistent typography
+Professional icons
+Realistic relevant photography
+Smooth animations
+Professional assessment
+Professional forms
+Professional result
+Professional thank-you
+Professional footer
+
+============================================================
+71. FINAL TESTING
+============================================================
+
+Test:
+
+Homepage
+Header
+Mobile menu
+Hero
+Images
+Career cards
+Career modal
+How It Works
+About
+Team
+FAQ
+Contact
+Footer
+Privacy
+Terms
+404
+
+Assessment:
+
+Intro
+Student information
+Q1
+PCB branch
+PCM branch
+Commerce branch
+Humanities branch
+Q2–Q20
+Next
+Previous
+Progress
+Review
+Submit
+Scoring
+Result
+Thank-you
+Email
+
+Test every branch independently.
+
+No:
+
+wrong questions
+skipped questions
+duplicate questions
+broken scoring
+dead buttons
+console errors
+PHP errors
+horizontal overflow
+broken images
+
+============================================================
+72. FINAL USER EXPERIENCE
+============================================================
+
+The user should feel:
+
+“This website looks premium.”
+
+“I immediately understand what Real World Link does.”
+
+“I can explore career fields.”
+
+“I can take the assessment.”
+
+“The assessment is easy to use.”
+
+“The questions feel relevant.”
+
+“I received a clear career direction.”
+
+“My submission is complete.”
+
+“I received confirmation by email.”
+
+============================================================
+FINAL COMMAND
+============================================================
+
+BUILD THE COMPLETE PUBLIC WEBSITE NOW.
+
+Do NOT build the Admin Panel.
+
+Do NOT build OTP.
+
+Do NOT build login.
+
+Do NOT build document upload.
+
+Do NOT invent information.
+
+Use the supplied HTML as the foundation.
+
+Preserve the original career categories, assessment concept,
+branching logic and question concepts.
+
+Upgrade the entire public experience into a premium,
+light-theme, mobile-first, highly responsive EdTech website.
+
+Prioritize MOBILE UI quality.
+
+Use MANROPE as the primary font.
+
+Use LUCIDE ICONS consistently.
+
+Use real, relevant, properly licensed photography where it adds value.
+
+Use icons instead of photos where appropriate.
+
+Add professional micro-interactions, hover states,
+scroll reveals, page-load animations, assessment transitions,
+modal animations and success animations.
+
+Respect prefers-reduced-motion.
+
+Make the website fast.
+
+Make the code modular.
+
+Make the website MySQL-ready.
+
+Make the architecture compatible with a future Super Admin Panel.
+
+The final output must be a complete working public website,
+not a mockup and not a basic template.

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Real World Link"
+description = "A premium student career-discovery website for exploring interests, career fields, and a branching 20-question assessment from Real World Link — In Shorts by Aafiya & Sana."
+version = "1.0.0"
+id = "artifacts/real-world-link"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21656
+
+[services.development]
+run = "pnpm --filter @workspace/real-world-link run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/real-world-link", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/real-world-link/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21656"
+BASE_PATH = "/"
