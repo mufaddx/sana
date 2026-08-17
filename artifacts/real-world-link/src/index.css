@@ -232,7 +232,8 @@
 .faq-answer.open { max-height: 140px; padding: 0 42px 20px 0; }
 .faq-answer p { margin: 0; color: hsl(var(--muted-foreground)); line-height: 1.7; font-size: .84rem; }
 
-.contact-grid { display: grid; grid-template-columns: .7fr 1.3fr; gap: 90px; align-items: start; }
+.contact-grid { display: grid; grid-template-columns: minmax(260px, .82fr) minmax(0, 1.18fr); gap: clamp(42px, 7vw, 96px); align-items: start; }
+.contact-copy { max-width: 390px; padding-top: 12px; }
 .contact-card { padding: 29px; background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: 23px; box-shadow: var(--shadow-card); }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 .field { display: flex; flex-direction: column; gap: 7px; }
