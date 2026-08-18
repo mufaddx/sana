@@ -6,6 +6,7 @@ import {
   ChevronRight,
   ClipboardList,
   Clock3,
+  Eye,
   FileText,
   LayoutDashboard,
   LogOut,
@@ -26,6 +27,7 @@ import {
   X,
 } from 'lucide-react';
 import { type BoxStatus, boxStatusLabels, boxSteps } from '@/data/career-profiles';
+import { questionPrompt } from '@/data/assessment';
 
 type ContactStatus = 'new' | 'in_progress' | 'resolved';
 type AssessmentStatus = 'new' | 'reviewed' | 'contacted';
@@ -172,7 +174,8 @@ const ADMIN_STYLES = `
   .rwl-admin-stat-label { display: flex; align-items: center; gap: 7px; color: #71877e; font-size: .66rem; font-weight: 800; }
   .rwl-admin-stat-label svg { color: #5b8478; }
   .rwl-admin-stat-value { display: block; margin-top: 15px; color: #203238; font-size: 1.65rem; letter-spacing: -.06em; }
-  .rwl-admin-workspace { min-width: 0; display: grid; grid-template-columns: minmax(350px, .8fr) minmax(0, 1.2fr); gap: 15px; }
+  /* The list is now the whole workspace; details open in a popup. */
+  .rwl-admin-workspace { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 15px; }
   .rwl-admin-panel { min-width: 0; border: 1px solid #dce2db; border-radius: 17px; background: #fbfcf8; box-shadow: 0 9px 24px rgba(47, 73, 67, .035); }
   .rwl-admin-panel-head { min-height: 64px; padding: 17px 19px; display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid #e4e8e2; }
   .rwl-admin-panel-head h2 { margin: 0; font-size: .92rem; letter-spacing: -.02em; }
@@ -222,6 +225,49 @@ const ADMIN_STYLES = `
   .rwl-admin-form-field select:focus, .rwl-admin-form-field textarea:focus, .rwl-admin-setting-input:focus { border-color: #79a694; box-shadow: 0 0 0 3px rgba(121, 166, 148, .13); }
   .rwl-admin-form-field textarea { min-height: 100px; resize: vertical; line-height: 1.6; }
   .rwl-admin-edit-row { display: grid; grid-template-columns: 170px minmax(0, 1fr) auto; align-items: end; gap: 12px; }
+  /* Search + filters above the list */
+  .rwl-admin-list-controls { display: grid; gap: 10px; padding: 14px 19px; border-bottom: 1px solid #e4e8e2; }
+  .rwl-admin-search { display: flex; align-items: center; gap: 9px; padding: 0 12px; border: 1px solid #d4dfd7; border-radius: 10px; background: #f8faf6; color: #789087; }
+  .rwl-admin-search:focus-within { border-color: #79a694; box-shadow: 0 0 0 3px rgba(121, 166, 148, .13); }
+  .rwl-admin-search input { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: #33494b; font-size: .78rem; padding: 11px 0; }
+  .rwl-admin-search input::-webkit-search-cancel-button { display: none; }
+  .rwl-admin-search button { display: grid; place-items: center; border: 0; background: transparent; color: #8a9a95; cursor: pointer; padding: 3px; border-radius: 6px; }
+  .rwl-admin-search button:hover { background: #e6ede8; color: #33494b; }
+  /* View button on each row */
+  .rwl-admin-record { align-items: center; }
+  .rwl-admin-view-button { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid #cfe0d5; border-radius: 9px; background: #fff; color: #2c6a58; font-size: .72rem; font-weight: 800; cursor: pointer; transition: background .18s ease, border-color .18s ease; }
+  .rwl-admin-view-button:hover { background: #eaf3ed; border-color: #79a694; }
+  /* Detail popup */
+  .rwl-admin-modal-backdrop { position: fixed; inset: 0; z-index: 60; background: rgba(20, 38, 33, .55); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 26px; animation: rwlAdminFade .18s ease both; }
+  @keyframes rwlAdminFade { from { opacity: 0; } to { opacity: 1; } }
+  .rwl-admin-modal { width: min(100%, 860px); max-height: min(90dvh, 900px); display: flex; flex-direction: column; background: #fbfdfa; border: 1px solid #dfe7e0; border-radius: 18px; box-shadow: 0 26px 70px rgba(20, 38, 33, .28); overflow: hidden; animation: rwlAdminRise .22s ease both; }
+  @keyframes rwlAdminRise { from { opacity: 0; transform: translateY(12px) scale(.985); } to { opacity: 1; transform: none; } }
+  .rwl-admin-modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 19px; border-bottom: 1px solid #e4e8e2; background: #fff; }
+  .rwl-admin-modal-head-right { display: flex; align-items: flex-start; gap: 12px; }
+  .rwl-admin-modal-close { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #dfe7e0; border-radius: 9px; background: #fff; color: #5c7168; cursor: pointer; }
+  .rwl-admin-modal-close:hover { background: #eef3ee; color: #26483c; }
+  /* One section at a time */
+  .rwl-admin-section-tabs { display: flex; gap: 8px; padding: 13px 19px; border-bottom: 1px solid #e4e8e2; background: #fff; }
+  .rwl-admin-section-tab { display: inline-flex; align-items: center; gap: 7px; padding: 9px 15px; border: 1px solid #dfe7e0; border-radius: 999px; background: #fff; color: #5c7168; font-size: .74rem; font-weight: 800; cursor: pointer; transition: all .18s ease; }
+  .rwl-admin-section-tab:hover { border-color: #79a694; color: #2c6a58; }
+  .rwl-admin-section-tab.active { background: #2c6a58; border-color: #2c6a58; color: #fff; }
+  .rwl-admin-modal-body { flex: 1; overflow-y: auto; padding: 19px; }
+  .rwl-admin-modal-foot { display: grid; grid-template-columns: 170px minmax(0, 1fr) auto; align-items: end; gap: 12px; padding: 16px 19px; border-top: 1px solid #e4e8e2; background: #fff; }
+  .rwl-admin-modal-foot textarea { min-height: 62px; }
+  .rwl-admin-modal-foot .rwl-admin-inline-feedback { grid-column: 1 / -1; }
+  /* Student summary strip */
+  .rwl-admin-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 11px; margin-bottom: 18px; }
+  .rwl-admin-summary-grid > div { padding: 11px 13px; border: 1px solid #e4ece6; border-radius: 11px; background: #fff; }
+  .rwl-admin-summary-grid span { display: block; font-size: .6rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: #789087; }
+  .rwl-admin-summary-grid strong { display: block; margin-top: 4px; font-size: .78rem; color: #33494b; }
+  /* Question and answer transcript */
+  .rwl-admin-qa-list { display: grid; gap: 9px; }
+  .rwl-admin-qa { display: flex; gap: 12px; padding: 13px 15px; border: 1px solid #e4ece6; border-radius: 12px; background: #fff; }
+  .rwl-admin-qa-number { flex: 0 0 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: #eef3ee; color: #5c7168; font-size: .68rem; font-weight: 800; }
+  .rwl-admin-qa-body { min-width: 0; }
+  .rwl-admin-qa-question { font-size: .72rem; font-weight: 700; color: #789087; line-height: 1.55; }
+  .rwl-admin-qa-answer { margin-top: 5px; font-size: .84rem; font-weight: 700; color: #26483c; line-height: 1.5; }
+  .rwl-admin-qa-career { margin-top: 4px; font-size: .66rem; font-weight: 700; color: #8a9a95; }
   .rwl-admin-form-field input { width: 100%; border: 1px solid #d4dfd7; border-radius: 9px; outline: none; background: #f8faf6; color: #33494b; padding: 10px 11px; font-size: .75rem; transition: border-color .2s ease, box-shadow .2s ease; }
   .rwl-admin-form-field input:focus { border-color: #79a694; box-shadow: 0 0 0 3px rgba(121, 166, 148, .13); }
   .rwl-admin-form-field label { display: flex; align-items: center; gap: 5px; }
@@ -328,6 +374,13 @@ const ADMIN_STYLES = `
     .rwl-admin-box .rwl-admin-edit-row { grid-template-columns: 1fr; }
     .rwl-admin-box .rwl-admin-button { justify-self: stretch; }
     .rwl-admin-box-facts { grid-template-columns: 1fr; }
+    .rwl-admin-modal-backdrop { padding: 0; align-items: stretch; }
+    .rwl-admin-modal { width: 100%; max-height: 100dvh; border-radius: 0; border: 0; }
+    .rwl-admin-modal-head { flex-direction: column; gap: 12px; }
+    .rwl-admin-modal-head-right { width: 100%; justify-content: space-between; }
+    .rwl-admin-modal-foot { grid-template-columns: 1fr; }
+    .rwl-admin-record { flex-wrap: wrap; }
+    .rwl-admin-view-button { width: 100%; justify-content: center; }
     .rwl-admin-settings-intro { display: block; }
     .rwl-admin-setting-row { grid-template-columns: 1fr 38px; }
     .rwl-admin-setting-key { grid-column: 1 / -1; }
@@ -481,21 +534,27 @@ function RecordList({
         const meta = record.kind === 'contact' ? item.email : `${(item as AssessmentSubmission).grade} · ${(item as AssessmentSubmission).city} · ${(item as AssessmentSubmission).school}`;
         const key = `${record.kind}-${item.id}`;
         return (
-          <button className={`rwl-admin-record ${selectedKey === key ? 'selected' : ''}`} key={key} type="button" onClick={() => onSelect(record)}>
+          <div className={`rwl-admin-record ${selectedKey === key ? 'selected' : ''}`} key={key}>
             <span className={`rwl-admin-record-avatar ${record.kind}`}>{record.kind === 'contact' ? <MessageSquare size={16} /> : getInitials(item.name)}</span>
             <span className="rwl-admin-record-copy">
               <span className="rwl-admin-record-line"><span className="rwl-admin-record-name">{item.name}</span><span className="rwl-admin-record-date">{formatDate(item.created_at)}</span></span>
               <span className="rwl-admin-record-meta">{title} · {meta}</span>
               <span className={`rwl-admin-status ${item.status}`}>{formatStatus(item.status)}</span>
             </span>
-          </button>
+            <button className="rwl-admin-view-button" type="button" onClick={() => onSelect(record)} data-testid={`button-view-${key}`}>
+              <Eye size={14} /> View
+            </button>
+          </div>
         );
       })}
     </div>
   );
 }
 
-function RecordDetail({
+// Full record shown in a popup. An assessment has two sections - the answers
+// and the Linking Box - and only one is open at a time so neither buries the
+// other. Contacts have a single message, so they show no section switcher.
+function SubmissionModal({
   record,
   status,
   notes,
@@ -506,8 +565,9 @@ function RecordDetail({
   saved,
   onSave,
   onBoxUpdated,
+  onClose,
 }: {
-  record: AdminRecord | null;
+  record: AdminRecord;
   status: ContactStatus | AssessmentStatus;
   notes: string;
   setStatus: (value: ContactStatus | AssessmentStatus) => void;
@@ -517,61 +577,126 @@ function RecordDetail({
   saved: boolean;
   onSave: () => void;
   onBoxUpdated: (assessment: AssessmentSubmission) => void;
+  onClose: () => void;
 }) {
-  if (!record) {
-    return (
-      <div className="rwl-admin-empty">
-        <div>
-          <div className="rwl-admin-empty-icon"><Search size={20} /></div>
-          <h3>Select a submission</h3>
-          <p>Choose a message or assessment from the list to read the full details.</p>
-        </div>
-      </div>
-    );
-  }
-  const item = record.item;
   const isContact = record.kind === 'contact';
+  const [section, setSection] = useState<'answers' | 'delivery'>('answers');
+  const item = record.item;
   const contact = item as ContactSubmission;
   const assessment = item as AssessmentSubmission;
   const statusOptions = isContact ? (['new', 'in_progress', 'resolved'] as ContactStatus[]) : (['new', 'reviewed', 'contacted'] as AssessmentStatus[]);
+
+  // Reset to the first section when a different record is opened.
+  useEffect(() => { setSection('answers'); }, [record.kind, item.id]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+  }, [onClose]);
+
   return (
-    <div className="rwl-admin-detail-body">
-      <div className="rwl-admin-detail-identity">
-        <div className="rwl-admin-detail-title">
-          <div className={`rwl-admin-detail-icon ${record.kind}`}><span>{isContact ? <MessageSquare size={19} /> : <ClipboardList size={19} />}</span></div>
-          <div><h2>{item.name}</h2><p>{item.email}</p></div>
-        </div>
-        <div className="rwl-admin-detail-date"><strong>{isContact ? contact.subject : `${assessment.stream} assessment`}</strong>{formatDate(item.created_at)}</div>
-      </div>
-      <div className="rwl-admin-detail-grid">
-        {isContact ? (
-          <div className="rwl-admin-detail-section full"><span className="rwl-admin-detail-label">Message</span><div className="rwl-admin-detail-value">{contact.message}</div></div>
-        ) : (
-          <>
-            <div className="rwl-admin-detail-section"><span className="rwl-admin-detail-label">Student details</span><div className="rwl-admin-detail-value">{assessment.grade} · {assessment.city}<br />{assessment.school}</div></div>
-            <div className="rwl-admin-detail-section"><span className="rwl-admin-detail-label">Assessment result</span><div className="rwl-admin-detail-value">{assessment.result || 'No result recorded'}</div></div>
-            <div className="rwl-admin-detail-section full"><span className="rwl-admin-detail-label">Answers</span><div className="rwl-admin-answer-list">{Object.keys(assessment.answers).length === 0 ? <div className="rwl-admin-detail-value">No answers recorded.</div> : Object.entries(assessment.answers).map(([key, value]) => <div className="rwl-admin-answer" key={key}><span>{key}</span><strong>{renderAnswer(value)}</strong></div>)}</div></div>
-          </>
-        )}
-        <div className="rwl-admin-detail-section full rwl-admin-edit">
-          <div className="rwl-admin-edit-row">
-            <div className="rwl-admin-form-field">
-              <label htmlFor="submission-status">Status</label>
-              <select id="submission-status" value={status} onChange={(event) => setStatus(event.target.value as ContactStatus | AssessmentStatus)}>
-                {statusOptions.map((option) => <option key={option} value={option}>{formatStatus(option)}</option>)}
-              </select>
+    <div className="rwl-admin-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <div className="rwl-admin-modal" role="dialog" aria-modal="true" aria-labelledby="rwl-admin-modal-title">
+        <div className="rwl-admin-modal-head">
+          <div className="rwl-admin-detail-title">
+            <div className={`rwl-admin-detail-icon ${record.kind}`}><span>{isContact ? <MessageSquare size={19} /> : <ClipboardList size={19} />}</span></div>
+            <div>
+              <h2 id="rwl-admin-modal-title">{item.name}</h2>
+              <p>{item.email}{!isContact && assessment.phone ? ' · ' + assessment.phone : ''}</p>
             </div>
-            <div className="rwl-admin-form-field">
-              <label htmlFor="submission-notes">Private notes</label>
-              <textarea id="submission-notes" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Add a note for your team…" />
-            </div>
-            <button className="rwl-admin-button" type="button" disabled={saving} onClick={onSave}><Save size={14} /> {saving ? 'Saving…' : 'Save changes'}</button>
           </div>
+          <div className="rwl-admin-modal-head-right">
+            <div className="rwl-admin-detail-date">
+              <strong>{isContact ? contact.subject : `${assessment.stream} assessment`}</strong>
+              {formatDate(item.created_at)}
+            </div>
+            <button className="rwl-admin-modal-close" type="button" onClick={onClose} aria-label="Close" data-testid="button-close-modal"><X size={17} /></button>
+          </div>
+        </div>
+
+        {!isContact && (
+          <div className="rwl-admin-section-tabs">
+            <button className={`rwl-admin-section-tab ${section === 'answers' ? 'active' : ''}`} type="button" onClick={() => setSection('answers')} data-testid="tab-answers">
+              <ClipboardList size={15} /> Questions &amp; answers
+            </button>
+            <button className={`rwl-admin-section-tab ${section === 'delivery' ? 'active' : ''}`} type="button" onClick={() => setSection('delivery')} data-testid="tab-delivery">
+              <Package size={15} /> Delivery
+            </button>
+          </div>
+        )}
+
+        <div className="rwl-admin-modal-body">
+          {isContact && (
+            <div className="rwl-admin-detail-section full"><span className="rwl-admin-detail-label">Message</span><div className="rwl-admin-detail-value">{contact.message}</div></div>
+          )}
+
+          {!isContact && section === 'answers' && (
+            <>
+              <div className="rwl-admin-summary-grid">
+                <div><span>Class</span><strong>{assessment.grade || 'Not given'}</strong></div>
+                <div><span>City</span><strong>{assessment.city || 'Not given'}</strong></div>
+                <div><span>School</span><strong>{assessment.school || 'Not given'}</strong></div>
+                <div><span>Result</span><strong>{assessment.result || 'No result recorded'}</strong></div>
+              </div>
+              <AnswerSheet assessment={assessment} />
+            </>
+          )}
+
+          {!isContact && section === 'delivery' && <LinkingBoxPanel assessment={assessment} onUpdated={onBoxUpdated} />}
+        </div>
+
+        <div className="rwl-admin-modal-foot">
+          <div className="rwl-admin-form-field">
+            <label htmlFor="submission-status">Status</label>
+            <select id="submission-status" value={status} onChange={(event) => setStatus(event.target.value as ContactStatus | AssessmentStatus)}>
+              {statusOptions.map((option) => <option key={option} value={option}>{formatStatus(option)}</option>)}
+            </select>
+          </div>
+          <div className="rwl-admin-form-field">
+            <label htmlFor="submission-notes">Private notes</label>
+            <textarea id="submission-notes" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Add a note for your team..." />
+          </div>
+          <button className="rwl-admin-button" type="button" disabled={saving} onClick={onSave}><Save size={14} /> {saving ? 'Saving...' : 'Save changes'}</button>
           {saveError && <div className="rwl-admin-inline-feedback error"><AlertCircle size={14} /> {saveError}</div>}
           {saved && !saveError && <div className="rwl-admin-inline-feedback"><CheckCircle2 size={14} /> Changes saved for your team.</div>}
         </div>
-        {!isContact && <LinkingBoxPanel assessment={assessment} onUpdated={onBoxUpdated} />}
       </div>
+    </div>
+  );
+}
+
+// Pairs each stored answer with the question the student was actually asked,
+// so the workspace reads as a transcript rather than as stored data.
+function AnswerSheet({ assessment }: { assessment: AssessmentSubmission }) {
+  const entries = Object.entries(assessment.answers)
+    .map(([key, value]) => ({ index: Number(key), value }))
+    .filter((entry) => Number.isFinite(entry.index))
+    .sort((a, b) => a.index - b.index);
+
+  if (entries.length === 0) {
+    return <div className="rwl-admin-detail-value">No answers recorded.</div>;
+  }
+
+  return (
+    <div className="rwl-admin-qa-list">
+      <span className="rwl-admin-detail-label">{entries.length} answers</span>
+      {entries.map(({ index, value }) => {
+        const answer = value as { text?: unknown; career?: unknown } | null;
+        const answerText = typeof answer?.text === 'string' ? answer.text : renderAnswer(value);
+        const career = typeof answer?.career === 'string' ? answer.career : '';
+        return (
+          <div className="rwl-admin-qa" key={index}>
+            <div className="rwl-admin-qa-number">{index + 1}</div>
+            <div className="rwl-admin-qa-body">
+              <div className="rwl-admin-qa-question">{questionPrompt(assessment.stream, index)}</div>
+              <div className="rwl-admin-qa-answer">{answerText}</div>
+              {career && career !== answerText && <div className="rwl-admin-qa-career">Points to: {career}</div>}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -774,6 +899,7 @@ function AdminWorkspace({ adminEmail, onLogout }: { adminEmail: string; onLogout
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
   const [assessments, setAssessments] = useState<AssessmentSubmission[]>([]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
   const [status, setStatus] = useState<ContactStatus | AssessmentStatus>('new');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(true);
@@ -787,11 +913,24 @@ function AdminWorkspace({ adminEmail, onLogout }: { adminEmail: string; onLogout
   const [settingsError, setSettingsError] = useState('');
   const [settingsSaved, setSettingsSaved] = useState(false);
 
-  const records = useMemo<AdminRecord[]>(() => [
+  const allRecords = useMemo<AdminRecord[]>(() => [
     ...contacts.map((item) => ({ kind: 'contact' as const, item })),
     ...assessments.map((item) => ({ kind: 'assessment' as const, item })),
   ].sort((a, b) => new Date(b.item.created_at).getTime() - new Date(a.item.created_at).getTime()), [contacts, assessments]);
-  const selectedRecord = useMemo(() => records.find((record) => `${record.kind}-${record.item.id}` === selectedKey) ?? null, [records, selectedKey]);
+  // Free-text search across the fields an admin would actually recall:
+  // who they are, how to reach them, where they are and what came back.
+  const records = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return allRecords;
+    return allRecords.filter(({ kind, item }) => {
+      const assessment = item as AssessmentSubmission;
+      const haystack = kind === 'contact'
+        ? [item.name, item.email, (item as ContactSubmission).subject, (item as ContactSubmission).message]
+        : [item.name, item.email, assessment.city, assessment.school, assessment.grade, assessment.stream, assessment.result, assessment.phone, assessment.pincode, assessment.tracking_code];
+      return haystack.filter(Boolean).some((value) => String(value).toLowerCase().includes(term));
+    });
+  }, [allRecords, search]);
+  const selectedRecord = useMemo(() => allRecords.find((record) => `${record.kind}-${record.item.id}` === selectedKey) ?? null, [allRecords, selectedKey]);
 
   const loadSubmissions = useCallback(async () => {
     setLoading(true);
@@ -911,17 +1050,44 @@ function AdminWorkspace({ adminEmail, onLogout }: { adminEmail: string; onLogout
               </section>
               <section className="rwl-admin-workspace">
                 <div className="rwl-admin-panel">
-                  <div className="rwl-admin-panel-head"><div><h2>Recent submissions</h2><p>{loading ? 'Gathering the latest entries…' : `${records.length} shown in this view`}</p></div><UserRound size={18} color="#739287" /></div>
-                  <div className="rwl-admin-filter-bar" aria-label="Submission filters">
-                    {(['all', 'contact', 'assessment'] as SubmissionFilter[]).map((option) => <button className={`rwl-admin-filter ${filter === option ? 'active' : ''}`} key={option} type="button" onClick={() => setFilter(option)}>{option === 'all' ? 'All' : option === 'contact' ? 'Contacts' : 'Assessments'}</button>)}
+                  <div className="rwl-admin-panel-head"><div><h2>Students &amp; messages</h2><p>{loading ? 'Gathering the latest entries…' : `${records.length} of ${allRecords.length} shown`}</p></div><UserRound size={18} color="#739287" /></div>
+                  <div className="rwl-admin-list-controls">
+                    <div className="rwl-admin-search">
+                      <Search size={15} />
+                      <input
+                        type="search"
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder="Search by name, email, city, school, phone or result…"
+                        aria-label="Search submissions"
+                        data-testid="input-admin-search"
+                      />
+                      {search && <button type="button" onClick={() => setSearch('')} aria-label="Clear search"><X size={14} /></button>}
+                    </div>
+                    <div className="rwl-admin-filter-bar" aria-label="Submission filters">
+                      {(['all', 'contact', 'assessment'] as SubmissionFilter[]).map((option) => <button className={`rwl-admin-filter ${filter === option ? 'active' : ''}`} key={option} type="button" onClick={() => setFilter(option)}>{option === 'all' ? 'All' : option === 'contact' ? 'Contacts' : 'Assessments'}</button>)}
+                    </div>
                   </div>
-                  {loading ? <LoadingList /> : loadError ? <div className="rwl-admin-error"><div><div className="rwl-admin-error-icon"><AlertCircle size={20} /></div><h3>Submissions could not load</h3><p>{loadError}</p><button className="rwl-admin-button" type="button" onClick={() => void loadSubmissions()}><RefreshCw size={14} /> Try again</button></div></div> : <RecordList records={records} selectedKey={selectedKey} onSelect={(record) => setSelectedKey(`${record.kind}-${record.item.id}`)} />}
-                </div>
-                <div className="rwl-admin-panel rwl-admin-detail">
-                  <div className="rwl-admin-panel-head"><div><h2>Submission details</h2><p>Read closely, then leave a useful next step.</p></div><FileText size={18} color="#739287" /></div>
-                  {loading ? <div className="rwl-admin-detail-skeleton" /> : <RecordDetail record={selectedRecord} status={status} notes={notes} setStatus={setStatus} setNotes={setNotes} saving={saving} saveError={saveError} saved={saved} onSave={() => void saveRecord()} onBoxUpdated={(updated) => setAssessments((current) => current.map((entry) => entry.id === updated.id ? updated : entry))} />}
+                  {loading ? <LoadingList /> : loadError ? <div className="rwl-admin-error"><div><div className="rwl-admin-error-icon"><AlertCircle size={20} /></div><h3>Submissions could not load</h3><p>{loadError}</p><button className="rwl-admin-button" type="button" onClick={() => void loadSubmissions()}><RefreshCw size={14} /> Try again</button></div></div>
+                    : records.length === 0 && search ? <EmptyState message={`Nothing matches “${search}”. Try a different name, city or email.`} />
+                    : <RecordList records={records} selectedKey={selectedKey} onSelect={(record) => setSelectedKey(`${record.kind}-${record.item.id}`)} />}
                 </div>
               </section>
+              {selectedRecord && (
+                <SubmissionModal
+                  record={selectedRecord}
+                  status={status}
+                  notes={notes}
+                  setStatus={setStatus}
+                  setNotes={setNotes}
+                  saving={saving}
+                  saveError={saveError}
+                  saved={saved}
+                  onSave={() => void saveRecord()}
+                  onBoxUpdated={(updated) => setAssessments((current) => current.map((entry) => entry.id === updated.id ? updated : entry))}
+                  onClose={() => setSelectedKey(null)}
+                />
+              )}
             </>
           ) : (
             <section className="rwl-admin-panel"><SettingsPanel entries={settingsEntries} setEntries={setSettingsEntries} loading={settingsLoading} saving={settingsSaving} error={settingsError} saved={settingsSaved} onSave={() => void saveSettings()} onRetry={() => void loadSettings()} /></section>
