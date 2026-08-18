@@ -354,6 +354,81 @@
 .not-found h1 { font-size: clamp(4rem, 12vw, 8rem); line-height: 1; color: hsl(var(--primary)); margin: 0; letter-spacing: -.09em; }
 .not-found p { color: hsl(var(--muted-foreground)); margin: 12px 0 24px; }
 
+/* Delivery details block inside the assessment info form */
+.delivery-block { margin-top: 4px; padding: 20px; border: 1px solid hsl(var(--border)); border-radius: 18px; background: rgba(255,255,255,.66); display: grid; gap: 16px; }
+.delivery-head { display: flex; gap: 11px; align-items: flex-start; color: hsl(var(--primary)); }
+.delivery-head strong { display: block; font-size: .84rem; color: hsl(var(--foreground)); letter-spacing: -.02em; }
+.delivery-head span { display: block; margin-top: 3px; font-size: .74rem; font-weight: 500; color: hsl(var(--muted-foreground)); }
+.delivery-block .field textarea { min-height: 74px; }
+
+/* Tracking code handed to the student after submitting */
+.tracking-card { margin: 26px auto 0; max-width: 460px; padding: 20px; border: 1px dashed #a9d2c7; border-radius: 18px; background: #eef7f4; display: grid; gap: 9px; justify-items: center; text-align: center; }
+.tracking-label { font-size: .66rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--primary)); }
+.tracking-card code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .95rem; font-weight: 700; letter-spacing: .04em; word-break: break-all; color: hsl(var(--foreground)); }
+.tracking-copy { min-height: 38px; padding: 0 15px; font-size: .74rem; }
+.tracking-note { font-size: .7rem; color: hsl(var(--muted-foreground)); }
+
+/* Student Linking Box dashboard */
+.dashboard { display: grid; gap: 0; }
+.dashboard > h1 { margin-bottom: 6px; }
+.dash-card { margin-top: 22px; padding: 24px; border: 1px solid hsl(var(--border)); border-radius: 20px; background: hsl(var(--card)); }
+.dash-card-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.dash-card-title { font-size: .95rem; font-weight: 800; letter-spacing: -.02em; margin: 0 0 12px; }
+.dash-card-head .dash-card-title { margin-bottom: 0; }
+.dash-card-head + * { margin-top: 14px; }
+.dash-result { font-size: clamp(1.3rem, 4vw, 1.8rem); font-weight: 800; letter-spacing: -.045em; color: hsl(var(--primary)); }
+.dash-quote { margin: 12px 0 0; padding-left: 15px; border-left: 3px solid hsl(var(--primary)); font-size: .85rem; line-height: 1.75; color: hsl(var(--foreground)); }
+.dash-muted { font-size: .78rem; color: hsl(var(--muted-foreground)); line-height: 1.65; }
+.dash-meta { display: flex; gap: 8px; align-items: baseline; margin-top: 14px; font-size: .76rem; }
+.dash-meta span { color: hsl(var(--muted-foreground)); }
+
+.box-pill { padding: 5px 12px; border-radius: 50px; font-size: .68rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.box-preparing { background: #eceff3; color: #47566b; }
+.box-designed { background: #ece7f7; color: #59459b; }
+.box-dispatched { background: #fdf0dc; color: #92610d; }
+.box-delivered { background: #dff1e9; color: hsl(169 48% 28%); }
+
+.box-tracker { list-style: none; margin: 20px 0 14px; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); position: relative; }
+.box-step { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; text-align: center; }
+/* Connecting rail between the four steps */
+.box-step:not(:last-child)::after { content: ''; position: absolute; top: 17px; left: calc(50% + 20px); right: calc(-50% + 20px); height: 2px; background: hsl(var(--border)); }
+.box-step.done:not(:last-child)::after { background: hsl(var(--primary)); }
+.box-node { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; border: 2px solid hsl(var(--border)); background: hsl(var(--card)); color: hsl(var(--muted-foreground)); position: relative; z-index: 1; }
+.box-step.done .box-node { border-color: hsl(var(--primary)); background: hsl(var(--primary)); color: #fff; }
+.box-step.current .box-node { border-color: hsl(var(--primary)); background: #e4f2ed; color: hsl(var(--primary)); box-shadow: 0 0 0 4px rgba(35,117,103,.12); }
+.box-label { font-size: .69rem; font-weight: 700; color: hsl(var(--muted-foreground)); }
+.box-step.done .box-label, .box-step.current .box-label { color: hsl(var(--foreground)); }
+
+.dash-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 18px; }
+.dash-fact { padding: 12px 14px; border-radius: 13px; background: #f5f8f7; }
+.dash-fact span { display: block; font-size: .66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+.dash-fact strong { display: block; margin-top: 4px; font-size: .82rem; }
+.dash-address { margin-top: 16px; padding-top: 16px; border-top: 1px solid hsl(var(--border)); display: grid; gap: 4px; }
+.dash-address > span:first-child { font-size: .66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+.dash-address strong { font-size: .82rem; line-height: 1.6; }
+
+.mentor-card { border-color: #bfe1d6; background: #f3faf7; }
+.mentor-name { font-size: 1.1rem; font-weight: 800; letter-spacing: -.03em; }
+.mentor-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.mentor-actions a { flex: 1 1 190px; justify-content: center; }
+
+.domain-tag { padding: 5px 11px; border-radius: 50px; background: #ece7f7; color: #59459b; font-size: .68rem; font-weight: 800; white-space: nowrap; }
+.challenge-title { font-size: 1.1rem; font-weight: 800; letter-spacing: -.03em; margin: 0 0 8px; color: hsl(var(--primary)); }
+.challenge-form { margin-top: 20px; padding-top: 20px; border-top: 1px solid hsl(var(--border)); display: grid; gap: 14px; justify-items: start; }
+.challenge-form .field { width: 100%; }
+.challenge-form textarea { min-height: 110px; }
+.challenge-submitted { display: flex; align-items: center; gap: 6px; color: hsl(var(--primary)); font-weight: 700; }
+.challenge-locked { margin-top: 18px; padding: 13px 15px; border-radius: 13px; background: #f5f8f7; }
+
+.badge-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 11px; margin-top: 14px; }
+.badge { display: grid; justify-items: center; gap: 7px; padding: 16px 10px; border: 1px solid hsl(var(--border)); border-radius: 15px; background: #fbfcfc; color: hsl(var(--muted-foreground)); opacity: .6; }
+.badge span { font-size: .72rem; font-weight: 800; }
+.badge.earned { opacity: 1; border-color: #bfe1d6; background: #eef7f4; color: hsl(var(--primary)); }
+
+.dash-code { margin-top: 22px; padding: 16px 18px; border: 1px dashed hsl(var(--border)); border-radius: 15px; display: grid; gap: 6px; }
+.dash-code > span:first-child { font-size: .66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+.dash-code code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .82rem; font-weight: 700; word-break: break-all; }
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modalIn { from { opacity: 0; transform: scale(.96) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -433,6 +508,14 @@
   .field.full { grid-column: auto; }
   .result-card { padding: 24px; }
   .legal-page { padding-top: 110px; }
+  .dash-card { padding: 19px 17px; }
+  .box-tracker { grid-template-columns: 1fr; gap: 0; margin: 16px 0 12px; }
+  .box-step { flex-direction: row; align-items: center; gap: 13px; text-align: left; padding: 7px 0; }
+  .box-step:not(:last-child)::after { top: 43px; left: 17px; right: auto; width: 2px; height: 14px; }
+  .box-label { font-size: .78rem; }
+  .mentor-actions a { flex: 1 1 100%; }
+  .dash-facts { grid-template-columns: 1fr; }
+  .tracking-card { padding: 17px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }

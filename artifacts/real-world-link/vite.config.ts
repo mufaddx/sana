@@ -69,6 +69,14 @@ export default defineConfig({
     strictPort: true,
     host: '0.0.0.0',
     allowedHosts: true,
+    // The app calls /api/... on its own origin, so in dev those requests are
+    // forwarded to the API server (port 5000 unless API_PORT says otherwise).
+    proxy: {
+      '/api': {
+        target: `http://127.0.0.1:${process.env.API_PORT || 5000}`,
+        changeOrigin: true,
+      },
+    },
     fs: {
       strict: true,
     },

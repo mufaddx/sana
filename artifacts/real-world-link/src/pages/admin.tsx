@@ -18,10 +18,14 @@ import {
   Settings,
   ShieldCheck,
   SlidersHorizontal,
+  Package,
+  PhoneCall,
   Trash2,
+  Truck,
   UserRound,
   X,
 } from 'lucide-react';
+import { type BoxStatus, boxStatusLabels, boxSteps } from '@/data/career-profiles';
 
 type ContactStatus = 'new' | 'in_progress' | 'resolved';
 type AssessmentStatus = 'new' | 'reviewed' | 'contacted';
@@ -52,6 +56,22 @@ type AssessmentSubmission = {
   answers: Record<string, unknown>;
   status: AssessmentStatus;
   notes: string | null;
+  // Linking Box delivery
+  phone: string;
+  address_line: string;
+  state: string;
+  pincode: string;
+  tracking_code: string | null;
+  box_status: BoxStatus;
+  dispatched_at: string | null;
+  expected_delivery_on: string | null;
+  delivered_at: string | null;
+  mentor_name: string;
+  mentor_phone: string;
+  challenge_notes: string | null;
+  challenge_submitted_at: string | null;
+  mentor_feedback: string | null;
+  mentor_feedback_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -202,6 +222,26 @@ const ADMIN_STYLES = `
   .rwl-admin-form-field select:focus, .rwl-admin-form-field textarea:focus, .rwl-admin-setting-input:focus { border-color: #79a694; box-shadow: 0 0 0 3px rgba(121, 166, 148, .13); }
   .rwl-admin-form-field textarea { min-height: 100px; resize: vertical; line-height: 1.6; }
   .rwl-admin-edit-row { display: grid; grid-template-columns: 170px minmax(0, 1fr) auto; align-items: end; gap: 12px; }
+  .rwl-admin-form-field input { width: 100%; border: 1px solid #d4dfd7; border-radius: 9px; outline: none; background: #f8faf6; color: #33494b; padding: 10px 11px; font-size: .75rem; transition: border-color .2s ease, box-shadow .2s ease; }
+  .rwl-admin-form-field input:focus { border-color: #79a694; box-shadow: 0 0 0 3px rgba(121, 166, 148, .13); }
+  .rwl-admin-form-field label { display: flex; align-items: center; gap: 5px; }
+  .rwl-admin-hint { display: flex; align-items: center; gap: 5px; font-size: .64rem; font-weight: 700; color: #8a6d1f; }
+  /* Linking Box panel */
+  .rwl-admin-box { margin-top: 6px; padding: 18px; border: 1px solid #d9e5db; border-radius: 14px; background: #f6faf7; }
+  .rwl-admin-box .rwl-admin-edit-row { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); align-items: start; margin-top: 16px; }
+  .rwl-admin-box .rwl-admin-form-field.full { grid-column: 1 / -1; }
+  .rwl-admin-box .rwl-admin-button { grid-column: 1 / -1; justify-self: start; }
+  .rwl-admin-box-track { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 14px; }
+  .rwl-admin-box-step { padding: 5px 11px; border-radius: 50px; font-size: .64rem; font-weight: 800; letter-spacing: .04em; background: #eceff0; color: #8a9a95; }
+  .rwl-admin-box-step.done { background: #d9ece3; color: #2c6a58; }
+  .rwl-admin-box-step.current { background: #2c6a58; color: #fff; }
+  .rwl-admin-box-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 11px; }
+  .rwl-admin-box-facts > div { padding: 10px 12px; border-radius: 10px; background: #fff; border: 1px solid #e4ece6; }
+  .rwl-admin-box-facts span { display: block; font-size: .6rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: #789087; }
+  .rwl-admin-box-facts strong { display: block; margin-top: 3px; font-size: .74rem; font-weight: 700; color: #33494b; word-break: break-word; }
+  .rwl-admin-box-facts code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .69rem; }
+  .rwl-admin-box-notes { margin-top: 13px; padding: 12px 14px; border-radius: 10px; background: #fff; border: 1px solid #e4ece6; }
+  .rwl-admin-box-notes .rwl-admin-detail-value { margin-top: 6px; white-space: pre-wrap; }
   .rwl-admin-button { min-height: 39px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 0; border-radius: 9px; padding: 0 14px; background: #3f7468; color: #f7fbf7; font-size: .69rem; font-weight: 800; transition: background .2s ease, transform .2s ease, opacity .2s ease; }
   .rwl-admin-button:hover { background: #315e55; transform: translateY(-1px); }
   .rwl-admin-button:disabled { cursor: wait; opacity: .58; transform: none; }
@@ -285,6 +325,9 @@ const ADMIN_STYLES = `
     .rwl-admin-detail-section.full { grid-column: auto; }
     .rwl-admin-edit-row { grid-template-columns: 1fr; }
     .rwl-admin-edit-row .rwl-admin-button { width: 100%; }
+    .rwl-admin-box .rwl-admin-edit-row { grid-template-columns: 1fr; }
+    .rwl-admin-box .rwl-admin-button { justify-self: stretch; }
+    .rwl-admin-box-facts { grid-template-columns: 1fr; }
     .rwl-admin-settings-intro { display: block; }
     .rwl-admin-setting-row { grid-template-columns: 1fr 38px; }
     .rwl-admin-setting-key { grid-column: 1 / -1; }
@@ -462,6 +505,7 @@ function RecordDetail({
   saveError,
   saved,
   onSave,
+  onBoxUpdated,
 }: {
   record: AdminRecord | null;
   status: ContactStatus | AssessmentStatus;
@@ -472,6 +516,7 @@ function RecordDetail({
   saveError: string;
   saved: boolean;
   onSave: () => void;
+  onBoxUpdated: (assessment: AssessmentSubmission) => void;
 }) {
   if (!record) {
     return (
@@ -525,7 +570,146 @@ function RecordDetail({
           {saveError && <div className="rwl-admin-inline-feedback error"><AlertCircle size={14} /> {saveError}</div>}
           {saved && !saveError && <div className="rwl-admin-inline-feedback"><CheckCircle2 size={14} /> Changes saved for your team.</div>}
         </div>
+        {!isContact && <LinkingBoxPanel assessment={assessment} onUpdated={onBoxUpdated} />}
       </div>
+    </div>
+  );
+}
+
+// Turns a DATE/DATETIME coming back from MySQL into the yyyy-mm-dd value an
+// <input type="date"> expects.
+function dateInputValue(value: string | null) {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 10);
+}
+
+function LinkingBoxPanel({
+  assessment,
+  onUpdated,
+}: {
+  assessment: AssessmentSubmission;
+  onUpdated: (assessment: AssessmentSubmission) => void;
+}) {
+  const [boxStatus, setBoxStatus] = useState<BoxStatus>(assessment.box_status);
+  const [expectedDeliveryOn, setExpectedDeliveryOn] = useState(dateInputValue(assessment.expected_delivery_on));
+  const [dispatchedOn, setDispatchedOn] = useState(dateInputValue(assessment.dispatched_at));
+  const [mentorName, setMentorName] = useState(assessment.mentor_name ?? '');
+  const [mentorPhone, setMentorPhone] = useState(assessment.mentor_phone ?? '');
+  const [mentorFeedback, setMentorFeedback] = useState(assessment.mentor_feedback ?? '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+
+  // Reset the form whenever a different student is selected.
+  useEffect(() => {
+    setBoxStatus(assessment.box_status);
+    setExpectedDeliveryOn(dateInputValue(assessment.expected_delivery_on));
+    setDispatchedOn(dateInputValue(assessment.dispatched_at));
+    setMentorName(assessment.mentor_name ?? '');
+    setMentorPhone(assessment.mentor_phone ?? '');
+    setMentorFeedback(assessment.mentor_feedback ?? '');
+    setError('');
+    setNotice('');
+  }, [assessment.id, assessment.box_status, assessment.expected_delivery_on, assessment.dispatched_at, assessment.mentor_name, assessment.mentor_phone, assessment.mentor_feedback]);
+
+  const statusChanged = boxStatus !== assessment.box_status;
+
+  const save = async () => {
+    setSaving(true);
+    setError('');
+    setNotice('');
+    try {
+      const payload = await requestJson<{ assessment: AssessmentSubmission | null; emailQueued: boolean }>(
+        `/api/admin/box/${assessment.id}`,
+        {
+          method: 'PATCH',
+          body: {
+            boxStatus,
+            expectedDeliveryOn: expectedDeliveryOn || null,
+            dispatchedOn: dispatchedOn || null,
+            mentorName,
+            mentorPhone,
+            mentorFeedback,
+          },
+        },
+      );
+      if (payload.assessment) onUpdated(payload.assessment);
+      setNotice(payload.emailQueued ? 'Saved. A status email has been sent to the student.' : 'Linking Box details saved.');
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Linking Box changes could not be saved.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const address = [assessment.address_line, assessment.city, assessment.state, assessment.pincode].filter(Boolean).join(', ');
+
+  return (
+    <div className="rwl-admin-detail-section full rwl-admin-box">
+      <span className="rwl-admin-detail-label"><Package size={13} /> Linking Box</span>
+
+      <div className="rwl-admin-box-track">
+        {boxSteps.map((step, index) => {
+          const currentIndex = boxSteps.findIndex((entry) => entry.key === assessment.box_status);
+          const state = index < currentIndex ? 'done' : index === currentIndex ? 'current' : 'todo';
+          return <span className={`rwl-admin-box-step ${state}`} key={step.key}>{step.label}</span>;
+        })}
+      </div>
+
+      <div className="rwl-admin-box-facts">
+        <div><span>Deliver to</span><strong>{address || 'No address recorded'}</strong></div>
+        <div><span>Phone</span><strong>{assessment.phone || 'Not provided'}</strong></div>
+        <div>
+          <span>Tracking code</span>
+          <strong>{assessment.tracking_code ? <code>{assessment.tracking_code}</code> : 'Not issued'}</strong>
+        </div>
+        {assessment.challenge_submitted_at && (
+          <div><span>Challenge turned in</span><strong>{formatDate(assessment.challenge_submitted_at)}</strong></div>
+        )}
+      </div>
+
+      {assessment.challenge_notes && (
+        <div className="rwl-admin-box-notes">
+          <span className="rwl-admin-detail-label">Student&rsquo;s challenge notes</span>
+          <div className="rwl-admin-detail-value">{assessment.challenge_notes}</div>
+        </div>
+      )}
+
+      <div className="rwl-admin-edit-row">
+        <div className="rwl-admin-form-field">
+          <label htmlFor={`box-status-${assessment.id}`}><Truck size={13} /> Delivery status</label>
+          <select id={`box-status-${assessment.id}`} value={boxStatus} onChange={(event) => setBoxStatus(event.target.value as BoxStatus)}>
+            {boxSteps.map((step) => <option key={step.key} value={step.key}>{boxStatusLabels[step.key]}</option>)}
+          </select>
+          {statusChanged && <span className="rwl-admin-hint"><Mail size={12} /> Saving will email the student.</span>}
+        </div>
+        <div className="rwl-admin-form-field">
+          <label htmlFor={`box-dispatched-${assessment.id}`}>Dispatch date</label>
+          <input id={`box-dispatched-${assessment.id}`} type="date" value={dispatchedOn} onChange={(event) => setDispatchedOn(event.target.value)} />
+        </div>
+        <div className="rwl-admin-form-field">
+          <label htmlFor={`box-expected-${assessment.id}`}>Expected delivery date</label>
+          <input id={`box-expected-${assessment.id}`} type="date" value={expectedDeliveryOn} onChange={(event) => setExpectedDeliveryOn(event.target.value)} />
+        </div>
+        <div className="rwl-admin-form-field">
+          <label htmlFor={`mentor-name-${assessment.id}`}><UserRound size={13} /> Assigned mentor</label>
+          <input id={`mentor-name-${assessment.id}`} value={mentorName} onChange={(event) => setMentorName(event.target.value)} placeholder="Aafiya &amp; Sana" />
+        </div>
+        <div className="rwl-admin-form-field">
+          <label htmlFor={`mentor-phone-${assessment.id}`}><PhoneCall size={13} /> Mentor phone</label>
+          <input id={`mentor-phone-${assessment.id}`} value={mentorPhone} onChange={(event) => setMentorPhone(event.target.value)} placeholder="+91 …" />
+        </div>
+        <div className="rwl-admin-form-field full">
+          <label htmlFor={`mentor-feedback-${assessment.id}`}>Feedback for the student</label>
+          <textarea id={`mentor-feedback-${assessment.id}`} value={mentorFeedback} onChange={(event) => setMentorFeedback(event.target.value)} placeholder="This appears on the student's dashboard and unlocks their skill badges…" />
+        </div>
+        <button className="rwl-admin-button" type="button" disabled={saving} onClick={() => void save()} data-testid="button-save-box">
+          <Save size={14} /> {saving ? 'Saving…' : 'Save Linking Box'}
+        </button>
+      </div>
+      {error && <div className="rwl-admin-inline-feedback error"><AlertCircle size={14} /> {error}</div>}
+      {notice && !error && <div className="rwl-admin-inline-feedback"><CheckCircle2 size={14} /> {notice}</div>}
     </div>
   );
 }
@@ -735,7 +919,7 @@ function AdminWorkspace({ adminEmail, onLogout }: { adminEmail: string; onLogout
                 </div>
                 <div className="rwl-admin-panel rwl-admin-detail">
                   <div className="rwl-admin-panel-head"><div><h2>Submission details</h2><p>Read closely, then leave a useful next step.</p></div><FileText size={18} color="#739287" /></div>
-                  {loading ? <div className="rwl-admin-detail-skeleton" /> : <RecordDetail record={selectedRecord} status={status} notes={notes} setStatus={setStatus} setNotes={setNotes} saving={saving} saveError={saveError} saved={saved} onSave={() => void saveRecord()} />}
+                  {loading ? <div className="rwl-admin-detail-skeleton" /> : <RecordDetail record={selectedRecord} status={status} notes={notes} setStatus={setStatus} setNotes={setNotes} saving={saving} saveError={saveError} saved={saved} onSave={() => void saveRecord()} onBoxUpdated={(updated) => setAssessments((current) => current.map((entry) => entry.id === updated.id ? updated : entry))} />}
                 </div>
               </section>
             </>

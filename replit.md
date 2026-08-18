@@ -9,7 +9,11 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env (API server): `MYSQL_HOST`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`
+- Admin workspace env: `ADMIN_EMAILS` (comma separated), `SESSION_SECRET`
+- Email env: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAIL_FROM_ADDRESS`, `MAIL_ADMIN_ADDRESS`
+- `PUBLIC_BASE_URL` — public origin of the site (for example `https://realworldlink.in`). Used to build
+  the Linking Box tracking links that go out in student emails. Without it, emails still send but omit the link.
 
 ## Stack
 

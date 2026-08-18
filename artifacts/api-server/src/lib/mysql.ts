@@ -1,4 +1,4 @@
-import mysql, { type Pool } from "mysql2/promise";
+import mysql, { type Pool, type RowDataPacket } from "mysql2/promise";
 import { logger } from "./logger";
 
 let pool: Pool | null = null;
@@ -106,6 +106,71 @@ const schemaStatements = [
     ('contact_reply_window', 'We will keep the conversation clear and student-friendly.')`,
 ];
 
+// Columns added after the first release. Applied with ALTER so existing
+// installations pick them up without losing data.
+const addedColumns: { table: string; column: string; definition: string }[] = [
+  // Delivery address details for the Linking Box.
+  { table: "rwl_assessment_submissions", column: "phone", definition: "VARCHAR(32) NOT NULL DEFAULT ''" },
+  { table: "rwl_assessment_submissions", column: "address_line", definition: "VARCHAR(255) NOT NULL DEFAULT ''" },
+  { table: "rwl_assessment_submissions", column: "state", definition: "VARCHAR(120) NOT NULL DEFAULT ''" },
+  { table: "rwl_assessment_submissions", column: "pincode", definition: "VARCHAR(12) NOT NULL DEFAULT ''" },
+  // Secret code that lets a student open their own tracking dashboard.
+  { table: "rwl_assessment_submissions", column: "tracking_code", definition: "VARCHAR(32) NULL" },
+  // Linking Box delivery lifecycle.
+  {
+    table: "rwl_assessment_submissions",
+    column: "box_status",
+    definition: "ENUM('preparing', 'designed', 'dispatched', 'delivered') NOT NULL DEFAULT 'preparing'",
+  },
+  { table: "rwl_assessment_submissions", column: "dispatched_at", definition: "DATETIME(3) NULL" },
+  { table: "rwl_assessment_submissions", column: "expected_delivery_on", definition: "DATE NULL" },
+  { table: "rwl_assessment_submissions", column: "delivered_at", definition: "DATETIME(3) NULL" },
+  // Assigned mentor shown on the student dashboard.
+  { table: "rwl_assessment_submissions", column: "mentor_name", definition: "VARCHAR(120) NOT NULL DEFAULT ''" },
+  { table: "rwl_assessment_submissions", column: "mentor_phone", definition: "VARCHAR(32) NOT NULL DEFAULT ''" },
+  // Practical challenge the student turns in, and the mentor's reply.
+  { table: "rwl_assessment_submissions", column: "challenge_notes", definition: "TEXT NULL" },
+  { table: "rwl_assessment_submissions", column: "challenge_submitted_at", definition: "DATETIME(3) NULL" },
+  { table: "rwl_assessment_submissions", column: "mentor_feedback", definition: "TEXT NULL" },
+  { table: "rwl_assessment_submissions", column: "mentor_feedback_at", definition: "DATETIME(3) NULL" },
+];
+
+const addedIndexes: { table: string; index: string; definition: string }[] = [
+  {
+    table: "rwl_assessment_submissions",
+    index: "idx_rwl_assessment_tracking",
+    definition: "UNIQUE INDEX idx_rwl_assessment_tracking (tracking_code)",
+  },
+  {
+    table: "rwl_assessment_submissions",
+    index: "idx_rwl_assessment_box_status",
+    definition: "INDEX idx_rwl_assessment_box_status (box_status)",
+  },
+];
+
+async function applyPendingMigrations(db: Pool) {
+  for (const { table, column, definition } of addedColumns) {
+    const [rows] = await db.query<RowDataPacket[]>(
+      "SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ? LIMIT 1",
+      [table, column],
+    );
+    if (rows.length === 0) {
+      await db.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${definition}`);
+      logger.info({ table, column }, "Added missing column");
+    }
+  }
+  for (const { table, index, definition } of addedIndexes) {
+    const [rows] = await db.query<RowDataPacket[]>(
+      "SELECT 1 FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = ? AND index_name = ? LIMIT 1",
+      [table, index],
+    );
+    if (rows.length === 0) {
+      await db.query(`ALTER TABLE \`${table}\` ADD ${definition}`);
+      logger.info({ table, index }, "Added missing index");
+    }
+  }
+}
+
 export async function initializeDatabase() {
   if (!databaseConfigured()) {
     logger.warn(
@@ -117,6 +182,7 @@ export async function initializeDatabase() {
   for (const statement of schemaStatements) {
     await db.query(statement);
   }
+  await applyPendingMigrations(db);
   await db.query("DELETE FROM rwl_admin_otp_challenges WHERE expires_at < UTC_TIMESTAMP(3)");
   await db.query("DELETE FROM rwl_admin_sessions WHERE expires_at < UTC_TIMESTAMP(3)");
   logger.info("MySQL schema is ready");

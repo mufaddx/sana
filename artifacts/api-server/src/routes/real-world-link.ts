@@ -6,6 +6,7 @@ import {
   mailConfigured,
   sendAdminNotification,
   sendAdminOtp,
+  sendBoxStatusUpdate,
   sendSubmissionConfirmation,
 } from "../lib/mailer";
 import { logger } from "../lib/logger";
@@ -14,6 +15,13 @@ const router: IRouter = Router();
 const SESSION_COOKIE = "rwl_admin_session";
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const OTP_TTL_MS = 10 * 60 * 1000;
+const BOX_STATUSES = ["preparing", "designed", "dispatched", "delivered"] as const;
+
+// Columns the student dashboard and the admin workspace both read.
+const ASSESSMENT_COLUMNS = `id, name, email, grade, city, school, stream, result, answers, status, notes,
+  phone, address_line, state, pincode, tracking_code, box_status, dispatched_at, expected_delivery_on,
+  delivered_at, mentor_name, mentor_phone, challenge_notes, challenge_submitted_at, mentor_feedback,
+  mentor_feedback_at, created_at, updated_at`;
 
 type AuthenticatedRequest = Request & { adminEmail?: string };
 type DatabaseRow = RowDataPacket & Record<string, unknown>;
@@ -82,6 +90,73 @@ function readEmail(value: unknown) {
     throw new Error("Enter a valid email address.");
   }
   return email;
+}
+
+function readPhone(value: unknown, required = true) {
+  const raw = readText(value, "Phone number", 32, required);
+  if (!raw) return "";
+  const digits = raw.replace(/[^\d]/g, "");
+  if (digits.length < 10 || digits.length > 15) throw new Error("Enter a valid phone number.");
+  return raw;
+}
+
+function readPincode(value: unknown, required = true) {
+  const raw = readText(value, "PIN code", 12, required);
+  if (!raw) return "";
+  if (!/^\d{4,10}$/.test(raw)) throw new Error("Enter a valid PIN code.");
+  return raw;
+}
+
+// Optional YYYY-MM-DD date used for the expected delivery day.
+function readDateOnly(value: unknown, field: string) {
+  if (value === null || value === undefined || value === "") return null;
+  const raw = readText(value, field, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) throw new Error(`${field} must use the YYYY-MM-DD format.`);
+  if (Number.isNaN(Date.parse(`${raw}T00:00:00Z`))) throw new Error(`${field} is not a real date.`);
+  return raw;
+}
+
+function publicBaseUrl() {
+  return envValue("PUBLIC_BASE_URL").replace(/\/+$/, "");
+}
+
+function trackingUrl(code: string) {
+  const base = publicBaseUrl();
+  return base ? `${base}/track?code=${encodeURIComponent(code)}` : undefined;
+}
+
+// Serialises one assessment row for the student's own dashboard. Deliberately
+// omits admin-only fields such as internal notes.
+function studentDashboardPayload(row: DatabaseRow) {
+  return {
+    name: String(row.name),
+    stream: String(row.stream),
+    result: row.result ? String(row.result) : null,
+    trackingCode: String(row.tracking_code),
+    box: {
+      status: String(row.box_status),
+      dispatchedAt: row.dispatched_at ?? null,
+      expectedDeliveryOn: row.expected_delivery_on ?? null,
+      deliveredAt: row.delivered_at ?? null,
+    },
+    address: {
+      line: String(row.address_line || ""),
+      city: String(row.city || ""),
+      state: String(row.state || ""),
+      pincode: String(row.pincode || ""),
+      phone: String(row.phone || ""),
+    },
+    mentor: {
+      name: String(row.mentor_name || ""),
+      phone: String(row.mentor_phone || ""),
+    },
+    challenge: {
+      notes: row.challenge_notes ? String(row.challenge_notes) : null,
+      submittedAt: row.challenge_submitted_at ?? null,
+      feedback: row.mentor_feedback ? String(row.mentor_feedback) : null,
+      feedbackAt: row.mentor_feedback_at ?? null,
+    },
+  };
 }
 
 function setSessionCookie(res: Response, value: string) {
@@ -161,24 +236,94 @@ router.post("/public/assessment", async (req, res) => {
     if (!["PCB", "PCM", "Commerce", "Humanities"].includes(stream)) throw new Error("Choose a valid stream.");
     const result = readText(req.body?.result, "Result", 255, false);
     const answers = req.body?.answers && typeof req.body.answers === "object" ? req.body.answers : {};
+    // Delivery details for the Linking Box.
+    const phone = readPhone(req.body?.phone);
+    const addressLine = readText(req.body?.address, "Address", 255);
+    const state = readText(req.body?.state, "State", 120);
+    const pincode = readPincode(req.body?.pincode);
+    // Long random code: this is the only secret guarding the student dashboard.
+    const trackingCode = randomBytes(16).toString("base64url");
     const [insertResult] = await db.execute<ResultSetHeader>(
-      "INSERT INTO rwl_assessment_submissions (name, email, grade, city, school, stream, result, answers) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [name, email, grade, city, school, stream, result || null, JSON.stringify(answers)],
+      `INSERT INTO rwl_assessment_submissions
+        (name, email, grade, city, school, stream, result, answers, phone, address_line, state, pincode, tracking_code)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, email, grade, city, school, stream, result || null, JSON.stringify(answers), phone, addressLine, state, pincode, trackingCode],
     );
     const notifications = await Promise.allSettled([
-      sendSubmissionConfirmation({ email, name, kind: "assessment" }),
+      sendSubmissionConfirmation({ email, name, kind: "assessment", trackingUrl: trackingUrl(trackingCode) }),
       sendAdminNotification({
         subject: `New ${stream} assessment from ${name}`,
-        text: `${name} (${email}) completed a ${stream} assessment.\nGrade: ${grade}\nCity: ${city}\nSchool: ${school || "Not provided"}\nResult: ${result || "Not recorded"}`,
+        text: `${name} (${email}) completed a ${stream} assessment.\nGrade: ${grade}\nResult: ${result || "Not recorded"}\nSchool: ${school || "Not provided"}\nPhone: ${phone}\nShip to: ${addressLine}, ${city}, ${state} ${pincode}`,
       }),
     ]);
     notifications.forEach((notification) => {
       if (notification.status === "rejected") logger.error({ err: notification.reason }, "Assessment email notification failed");
     });
-    res.status(201).json({ ok: true, id: Number(insertResult.insertId) });
+    res.status(201).json({ ok: true, id: Number(insertResult.insertId), trackingCode });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Assessment could not be saved.";
     res.status(message.includes("required") || message.includes("valid") || message.includes("too long") ? 400 : 500).json({ message });
+  }
+});
+
+// The student's own dashboard. The tracking code in the URL is the credential,
+// so it is compared in full and never guessable (128 bits of randomness).
+router.get("/public/track/:code", async (req, res) => {
+  const db = requireDatabase(res);
+  if (!db) return;
+  const code = String(req.params.code || "");
+  if (!/^[A-Za-z0-9_-]{10,32}$/.test(code)) {
+    res.status(404).json({ message: "That tracking code was not found." });
+    return;
+  }
+  try {
+    const [rows] = await db.execute<DatabaseRow[]>(
+      `SELECT ${ASSESSMENT_COLUMNS} FROM rwl_assessment_submissions WHERE tracking_code = ? LIMIT 1`,
+      [code],
+    );
+    if (rows.length === 0) {
+      res.status(404).json({ message: "That tracking code was not found." });
+      return;
+    }
+    res.json(studentDashboardPayload(rows[0]));
+  } catch (error) {
+    logger.error({ err: error }, "Student dashboard could not load");
+    res.status(500).json({ message: "Your dashboard could not load." });
+  }
+});
+
+// Student turns in their practical challenge from their dashboard.
+router.post("/public/track/:code/challenge", async (req, res) => {
+  const db = requireDatabase(res);
+  if (!db) return;
+  const code = String(req.params.code || "");
+  if (!/^[A-Za-z0-9_-]{10,32}$/.test(code)) {
+    res.status(404).json({ message: "That tracking code was not found." });
+    return;
+  }
+  try {
+    const notes = readText(req.body?.notes, "Your notes", 5000);
+    const [rows] = await db.execute<DatabaseRow[]>(
+      "SELECT id, name, email, result FROM rwl_assessment_submissions WHERE tracking_code = ? LIMIT 1",
+      [code],
+    );
+    const record = rows[0];
+    if (!record) {
+      res.status(404).json({ message: "That tracking code was not found." });
+      return;
+    }
+    await db.execute(
+      "UPDATE rwl_assessment_submissions SET challenge_notes = ?, challenge_submitted_at = UTC_TIMESTAMP(3) WHERE id = ?",
+      [notes, record.id],
+    );
+    sendAdminNotification({
+      subject: `Challenge turned in by ${String(record.name)}`,
+      text: `${String(record.name)} (${String(record.email)}) submitted their practical challenge for ${String(record.result || "their career field")}.\n\n${notes}`,
+    }).catch((error) => logger.error({ err: error }, "Challenge notification failed"));
+    res.status(201).json({ ok: true });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Your challenge could not be saved.";
+    res.status(message.includes("required") || message.includes("too long") ? 400 : 500).json({ message });
   }
 });
 
@@ -329,7 +474,7 @@ router.get("/admin/submissions", requireAdmin, async (req: AuthenticatedRequest,
     }
     if (type === "all" || type === "assessment") {
       const [rows] = await db.query<DatabaseRow[]>(
-        "SELECT id, name, email, grade, city, school, stream, result, answers, status, notes, created_at, updated_at FROM rwl_assessment_submissions ORDER BY created_at DESC LIMIT 500",
+        `SELECT ${ASSESSMENT_COLUMNS} FROM rwl_assessment_submissions ORDER BY created_at DESC LIMIT 500`,
       );
       assessments.push(...rows.map((row) => ({
         ...row,
@@ -374,6 +519,106 @@ router.patch("/admin/submissions/:kind/:id", requireAdmin, async (req: Authentic
     res.json({ ok: true });
   } catch (error) {
     res.status(500).json({ message: "Submission changes could not be saved." });
+  }
+});
+
+// Linking Box: delivery status, dates, assigned mentor and mentor feedback.
+// A change of box status emails the student.
+router.patch("/admin/box/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+  const db = getPool();
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    res.status(400).json({ message: "Invalid submission id." });
+    return;
+  }
+  try {
+    const [existingRows] = await db.execute<DatabaseRow[]>(
+      "SELECT id, name, email, box_status, tracking_code, mentor_feedback FROM rwl_assessment_submissions WHERE id = ? LIMIT 1",
+      [id],
+    );
+    const existing = existingRows[0];
+    if (!existing) {
+      res.status(404).json({ message: "Submission not found." });
+      return;
+    }
+
+    const updates: string[] = [];
+    const values: (string | number | null)[] = [];
+    let nextStatus: string | null = null;
+
+    if (req.body?.boxStatus !== undefined) {
+      const status = String(req.body.boxStatus);
+      if (!BOX_STATUSES.includes(status as (typeof BOX_STATUSES)[number])) {
+        res.status(400).json({ message: "Invalid box status." });
+        return;
+      }
+      if (status !== String(existing.box_status)) nextStatus = status;
+      updates.push("box_status = ?");
+      values.push(status);
+      // Stamp the lifecycle dates automatically the first time each step is reached.
+      if (status === "dispatched") updates.push("dispatched_at = COALESCE(dispatched_at, UTC_TIMESTAMP(3))");
+      if (status === "delivered") {
+        updates.push("dispatched_at = COALESCE(dispatched_at, UTC_TIMESTAMP(3))");
+        updates.push("delivered_at = COALESCE(delivered_at, UTC_TIMESTAMP(3))");
+      }
+    }
+    if (req.body?.expectedDeliveryOn !== undefined) {
+      updates.push("expected_delivery_on = ?");
+      values.push(readDateOnly(req.body.expectedDeliveryOn, "Expected delivery date"));
+    }
+    if (req.body?.dispatchedOn !== undefined) {
+      const dispatched = readDateOnly(req.body.dispatchedOn, "Dispatch date");
+      updates.push("dispatched_at = ?");
+      values.push(dispatched ? `${dispatched} 00:00:00.000` : null);
+    }
+    if (req.body?.mentorName !== undefined) {
+      updates.push("mentor_name = ?");
+      values.push(readText(req.body.mentorName, "Mentor name", 120, false));
+    }
+    if (req.body?.mentorPhone !== undefined) {
+      updates.push("mentor_phone = ?");
+      values.push(readPhone(req.body.mentorPhone, false));
+    }
+    if (req.body?.mentorFeedback !== undefined) {
+      const feedback = readText(req.body.mentorFeedback, "Feedback", 5000, false);
+      updates.push("mentor_feedback = ?");
+      values.push(feedback || null);
+      updates.push(feedback ? "mentor_feedback_at = UTC_TIMESTAMP(3)" : "mentor_feedback_at = NULL");
+    }
+
+    if (updates.length === 0) {
+      res.status(400).json({ message: "Nothing to update." });
+      return;
+    }
+
+    values.push(id);
+    await db.execute(`UPDATE rwl_assessment_submissions SET ${updates.join(", ")} WHERE id = ?`, values);
+
+    const [refreshed] = await db.execute<DatabaseRow[]>(
+      `SELECT ${ASSESSMENT_COLUMNS} FROM rwl_assessment_submissions WHERE id = ? LIMIT 1`,
+      [id],
+    );
+    const row = refreshed[0];
+
+    if (nextStatus && row) {
+      const expected = row.expected_delivery_on;
+      sendBoxStatusUpdate({
+        email: String(row.email),
+        name: String(row.name),
+        status: nextStatus,
+        expectedDeliveryOn: expected ? new Date(String(expected)).toISOString().slice(0, 10) : null,
+        trackingUrl: row.tracking_code ? trackingUrl(String(row.tracking_code)) : undefined,
+      }).catch((error) => logger.error({ err: error, id }, "Box status email failed"));
+    }
+
+    res.json({
+      ok: true,
+      assessment: row ? { ...row, id: Number(row.id), answers: typeof row.answers === "string" ? JSON.parse(row.answers) : row.answers } : null,
+      emailQueued: Boolean(nextStatus),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Linking Box changes could not be saved.";
+    res.status(message.includes("valid") || message.includes("format") || message.includes("too long") || message.includes("real date") ? 400 : 500).json({ message });
   }
 });
 
