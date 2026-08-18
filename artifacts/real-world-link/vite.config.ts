@@ -5,13 +5,10 @@ import { defineConfig } from 'vite';
 
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 
-const rawPort = process.env.PORT;
-
-if (!rawPort) {
-  throw new Error(
-    'PORT environment variable is required but was not provided.',
-  );
-}
+// PORT and BASE_PATH only matter for the dev server and for sub-path hosting.
+// A production build (`vite build`) must not require them, so both fall back to
+// a sensible default rather than throwing.
+const rawPort = process.env.PORT ?? '5173';
 
 const port = Number(rawPort);
 
@@ -19,12 +16,10 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-const basePath = process.env.BASE_PATH;
+const basePath = process.env.BASE_PATH || '/';
 
-if (!basePath) {
-  throw new Error(
-    'BASE_PATH environment variable is required but was not provided.',
-  );
+if (!basePath.startsWith('/')) {
+  throw new Error(`BASE_PATH must start with a slash, received: "${basePath}"`);
 }
 
 export default defineConfig({
