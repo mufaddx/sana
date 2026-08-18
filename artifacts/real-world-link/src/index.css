@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -48,7 +48,7 @@
   --accent-foreground: 221 29% 18%;
   --destructive: 5 72% 54%;
   --destructive-foreground: 0 0% 100%;
-  --app-font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --app-font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: 'SFMono-Regular', Consolas, monospace;
   --radius: 1.1rem;
@@ -318,8 +318,11 @@
 .question-kicker { color: hsl(var(--primary)); font-size: .75rem; font-weight: 800; }
 .question-title { font-size: clamp(1.55rem, 3.8vw, 2.45rem); letter-spacing: -.05em; line-height: 1.12; margin: 12px 0 28px; }
 .answer-card { min-height: 74px; align-items: center; }
-.answer-card strong { font-weight: 700; }
-.answer-card .choice-icon { width: 32px; height: 32px; }
+/* The stream cards stack a title over a description, so their text carries a
+   small top offset. Answer cards are a single line beside the icon, where that
+   offset is what pushes the icon off centre. */
+.answer-card strong { font-weight: 700; margin-top: 0; }
+.answer-card .choice-icon { width: 32px; height: 32px; align-self: center; }
 .answer-check { margin-left: auto; color: hsl(var(--primary)); }
 .assessment-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 28px; }
 .assessment-actions .button-secondary:disabled { opacity: .4; cursor: not-allowed; transform: none; }

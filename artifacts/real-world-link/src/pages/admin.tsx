@@ -7,21 +7,17 @@ import {
   ClipboardList,
   Clock3,
   Eye,
-  FileText,
   LayoutDashboard,
   LogOut,
   Mail,
   MessageSquare,
-  Plus,
   RefreshCw,
   Save,
   Search,
-  Settings,
   ShieldCheck,
   SlidersHorizontal,
   Package,
   PhoneCall,
-  Trash2,
   Truck,
   UserRound,
   X,
@@ -31,8 +27,7 @@ import { questionPrompt } from '@/data/assessment';
 
 type ContactStatus = 'new' | 'in_progress' | 'resolved';
 type AssessmentStatus = 'new' | 'reviewed' | 'contacted';
-type SubmissionFilter = 'all' | 'contact' | 'assessment';
-type WorkspaceTab = 'submissions' | 'settings';
+type WorkspaceTab = 'dashboard' | 'students' | 'contacts';
 
 type ContactSubmission = {
   id: number;
@@ -136,12 +131,13 @@ const api = {
 };
 
 const ADMIN_STYLES = `
-  .rwl-admin { min-height: 100dvh; background: #f4f5f0; color: #203238; font-family: var(--app-font-sans, Manrope, sans-serif); }
+  .rwl-admin { min-height: 100dvh; background: #f4f5f0; color: #203238; font-family: var(--app-font-sans, Inter, ui-sans-serif, system-ui, sans-serif); }
   .rwl-admin *, .rwl-admin *::before, .rwl-admin *::after { box-sizing: border-box; }
   .rwl-admin button, .rwl-admin input, .rwl-admin textarea, .rwl-admin select { font: inherit; }
   .rwl-admin button { cursor: pointer; }
-  .rwl-admin-shell { min-height: 100dvh; display: grid; grid-template-columns: 244px minmax(0, 1fr); }
-  .rwl-admin-sidebar { background: #20383a; color: #eff4ed; padding: 28px 18px 22px; display: flex; flex-direction: column; }
+  .rwl-admin-shell { min-height: 100dvh; display: grid; grid-template-columns: 244px minmax(0, 1fr); align-items: start; }
+  /* The rail and the page header stay put; only the content scrolls. */
+  .rwl-admin-sidebar { position: sticky; top: 0; height: 100dvh; background: #20383a; color: #eff4ed; padding: 28px 18px 22px; display: flex; flex-direction: column; }
   .rwl-admin-brand { padding: 0 12px 36px; }
   .rwl-admin-brand-word { display: block; font-size: .84rem; font-weight: 800; letter-spacing: .14em; }
   .rwl-admin-brand-sub { display: block; color: #a7beb5; font-size: .51rem; font-weight: 700; letter-spacing: .12em; margin-top: 8px; }
@@ -154,7 +150,7 @@ const ADMIN_STYLES = `
   .rwl-admin-sidebar-foot small { display: block; color: #8daaa0; font-size: .62rem; line-height: 1.6; }
   .rwl-admin-sidebar-foot strong { display: block; margin-top: 5px; color: #edf4ed; font-size: .72rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rwl-admin-main { min-width: 0; }
-  .rwl-admin-topbar { min-height: 78px; padding: 18px clamp(22px, 4vw, 58px); border-bottom: 1px solid #dce2db; background: rgba(250, 251, 247, .82); display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+  .rwl-admin-topbar { position: sticky; top: 0; z-index: 20; min-height: 78px; padding: 18px clamp(22px, 4vw, 58px); border-bottom: 1px solid #dce2db; background: rgba(250, 251, 247, .94); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: space-between; gap: 18px; }
   .rwl-admin-topbar-kicker { color: #628177; font-size: .62rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
   .rwl-admin-topbar-title { margin: 5px 0 0; font-size: 1.25rem; letter-spacing: -.04em; }
   .rwl-admin-topbar-actions { display: flex; align-items: center; gap: 10px; }
@@ -268,6 +264,34 @@ const ADMIN_STYLES = `
   .rwl-admin-qa-question { font-size: .72rem; font-weight: 700; color: #789087; line-height: 1.55; }
   .rwl-admin-qa-answer { margin-top: 5px; font-size: .84rem; font-weight: 700; color: #26483c; line-height: 1.5; }
   .rwl-admin-qa-career { margin-top: 4px; font-size: .66rem; font-weight: 700; color: #8a9a95; }
+  /* Count badge next to a sidebar item */
+  .rwl-admin-nav-count { margin-left: auto; padding: 2px 8px; border-radius: 999px; background: rgba(231, 241, 233, .16); color: #dbe8e1; font-size: .62rem; font-weight: 800; font-style: normal; }
+  .rwl-admin-nav-button.active .rwl-admin-nav-count { background: rgba(32, 50, 56, .16); color: #203238; }
+  /* Dashboard */
+  .rwl-admin-dash-panel { margin-top: 15px; }
+  .rwl-admin-dash-boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 11px; padding: 17px 19px; }
+  .rwl-admin-dash-box { padding: 15px; border: 1px solid #e4ece6; border-left: 3px solid #cfd9d3; border-radius: 12px; background: #fff; }
+  .rwl-admin-dash-box.designed { border-left-color: #8b74d0; }
+  .rwl-admin-dash-box.dispatched { border-left-color: #d99a2b; }
+  .rwl-admin-dash-box.delivered { border-left-color: #2c6a58; }
+  .rwl-admin-dash-box span { display: block; font-size: .64rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: #789087; }
+  .rwl-admin-dash-box strong { display: block; margin-top: 7px; font-size: 1.6rem; font-weight: 800; letter-spacing: -.04em; color: #26483c; }
+  .rwl-admin-dash-todo { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 11px; padding: 17px 19px 0; }
+  .rwl-admin-dash-todo > div { display: flex; align-items: baseline; justify-content: space-between; gap: 11px; padding: 13px 15px; border: 1px solid #e4ece6; border-radius: 11px; background: #fff; }
+  .rwl-admin-dash-todo span { font-size: .72rem; font-weight: 700; color: #5c7168; }
+  .rwl-admin-dash-todo strong { font-size: 1.05rem; font-weight: 800; color: #26483c; }
+  .rwl-admin-dash-todo > div.flag { border-color: #e8d3a6; background: #fdf8ec; }
+  .rwl-admin-dash-todo > div.flag strong { color: #8a6d1f; }
+  .rwl-admin-dash-foot { padding: 17px 19px; }
+  /* Unsaved-changes prompt inside the popup */
+  .rwl-admin-confirm { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; padding: 22px; background: rgba(32, 56, 48, .45); }
+  .rwl-admin-confirm-card { width: min(100%, 380px); display: grid; justify-items: center; gap: 7px; text-align: center; padding: 24px 22px; border-radius: 15px; background: #fff; color: #b4892a; box-shadow: 0 18px 44px rgba(20, 38, 33, .26); }
+  .rwl-admin-confirm-card h3 { margin: 5px 0 0; font-size: .95rem; color: #203238; }
+  .rwl-admin-confirm-card p { margin: 0; font-size: .75rem; color: #5c7168; line-height: 1.6; }
+  .rwl-admin-confirm-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 13px; }
+  .rwl-admin-ghost-button { padding: 10px 15px; border: 1px solid #dfe7e0; border-radius: 10px; background: #fff; color: #5c7168; font-size: .74rem; font-weight: 800; cursor: pointer; }
+  .rwl-admin-ghost-button:hover { border-color: #79a694; color: #26483c; }
+  .rwl-admin-modal { position: relative; }
   .rwl-admin-form-field input { width: 100%; border: 1px solid #d4dfd7; border-radius: 9px; outline: none; background: #f8faf6; color: #33494b; padding: 10px 11px; font-size: .75rem; transition: border-color .2s ease, box-shadow .2s ease; }
   .rwl-admin-form-field input:focus { border-color: #79a694; box-shadow: 0 0 0 3px rgba(121, 166, 148, .13); }
   .rwl-admin-form-field label { display: flex; align-items: center; gap: 5px; }
@@ -551,6 +575,76 @@ function RecordList({
   );
 }
 
+// Everything worth knowing at a glance: how many students came through, where
+// their boxes are, and what is still waiting on someone here.
+function DashboardPanel({
+  contacts,
+  assessments,
+  loading,
+  onOpenStudents,
+}: {
+  contacts: ContactSubmission[];
+  assessments: AssessmentSubmission[];
+  loading: boolean;
+  onOpenStudents: () => void;
+}) {
+  const boxCounts = boxSteps.map((step) => ({
+    ...step,
+    count: assessments.filter((item) => item.box_status === step.key).length,
+  }));
+  const value = (input: number) => (loading ? '—' : String(input));
+  const newAssessments = assessments.filter((item) => item.status === 'new').length;
+  const newContacts = contacts.filter((item) => item.status === 'new').length;
+  const challengesIn = assessments.filter((item) => item.challenge_submitted_at).length;
+  const awaitingFeedback = assessments.filter((item) => item.challenge_submitted_at && !item.mentor_feedback).length;
+  const noMentor = assessments.filter((item) => !item.mentor_name).length;
+  const noDeliveryDate = assessments.filter((item) => item.box_status !== 'delivered' && !item.expected_delivery_on).length;
+
+  return (
+    <>
+      <section className="rwl-admin-stat-grid" aria-label="Overview">
+        <div className="rwl-admin-stat primary"><span className="rwl-admin-stat-label"><UserRound size={14} /> Students</span><strong className="rwl-admin-stat-value">{value(assessments.length)}</strong></div>
+        <div className="rwl-admin-stat"><span className="rwl-admin-stat-label"><ClipboardList size={14} /> New assessments</span><strong className="rwl-admin-stat-value">{value(newAssessments)}</strong></div>
+        <div className="rwl-admin-stat"><span className="rwl-admin-stat-label"><Mail size={14} /> Contact messages</span><strong className="rwl-admin-stat-value">{value(contacts.length)}</strong></div>
+        <div className="rwl-admin-stat"><span className="rwl-admin-stat-label"><AlertCircle size={14} /> Unread messages</span><strong className="rwl-admin-stat-value">{value(newContacts)}</strong></div>
+      </section>
+
+      <section className="rwl-admin-panel rwl-admin-dash-panel">
+        <div className="rwl-admin-panel-head">
+          <div><h2>Linking Box delivery</h2><p>Where every student&rsquo;s box currently sits</p></div>
+          <Truck size={18} color="#739287" />
+        </div>
+        <div className="rwl-admin-dash-boxes">
+          {boxCounts.map((step) => (
+            <div className={`rwl-admin-dash-box ${step.key}`} key={step.key}>
+              <span>{boxStatusLabels[step.key]}</span>
+              <strong>{value(step.count)}</strong>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rwl-admin-panel rwl-admin-dash-panel">
+        <div className="rwl-admin-panel-head">
+          <div><h2>Needs your attention</h2><p>Open items, not a queue</p></div>
+          <Clock3 size={18} color="#739287" />
+        </div>
+        <div className="rwl-admin-dash-todo">
+          <div><span>Challenges turned in</span><strong>{value(challengesIn)}</strong></div>
+          <div className={awaitingFeedback > 0 ? 'flag' : ''}><span>Awaiting mentor feedback</span><strong>{value(awaitingFeedback)}</strong></div>
+          <div className={noMentor > 0 ? 'flag' : ''}><span>No mentor assigned</span><strong>{value(noMentor)}</strong></div>
+          <div className={noDeliveryDate > 0 ? 'flag' : ''}><span>No delivery date set</span><strong>{value(noDeliveryDate)}</strong></div>
+        </div>
+        <div className="rwl-admin-dash-foot">
+          <button className="rwl-admin-button" type="button" onClick={onOpenStudents} data-testid="button-open-students">
+            <UserRound size={14} /> Open students
+          </button>
+        </div>
+      </section>
+    </>
+  );
+}
+
 // Full record shown in a popup. An assessment has two sections - the answers
 // and the Linking Box - and only one is open at a time so neither buries the
 // other. Contacts have a single message, so they show no section switcher.
@@ -566,6 +660,7 @@ function SubmissionModal({
   onSave,
   onBoxUpdated,
   onClose,
+  isDirty,
 }: {
   record: AdminRecord;
   status: ContactStatus | AssessmentStatus;
@@ -575,12 +670,21 @@ function SubmissionModal({
   saving: boolean;
   saveError: string;
   saved: boolean;
-  onSave: () => void;
+  onSave: () => Promise<boolean>;
   onBoxUpdated: (assessment: AssessmentSubmission) => void;
   onClose: () => void;
+  isDirty: boolean;
 }) {
   const isContact = record.kind === 'contact';
   const [section, setSection] = useState<'answers' | 'delivery'>('answers');
+  // Only shown when closing would throw away edits.
+  const [confirmingClose, setConfirmingClose] = useState(false);
+
+  // Closing is free when nothing was touched; otherwise ask first.
+  const requestClose = useCallback(() => {
+    if (isDirty) setConfirmingClose(true);
+    else onClose();
+  }, [isDirty, onClose]);
   const item = record.item;
   const contact = item as ContactSubmission;
   const assessment = item as AssessmentSubmission;
@@ -590,14 +694,14 @@ function SubmissionModal({
   useEffect(() => { setSection('answers'); }, [record.kind, item.id]);
 
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') requestClose(); };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
-  }, [onClose]);
+  }, [requestClose]);
 
   return (
-    <div className="rwl-admin-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <div className="rwl-admin-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) requestClose(); }}>
       <div className="rwl-admin-modal" role="dialog" aria-modal="true" aria-labelledby="rwl-admin-modal-title">
         <div className="rwl-admin-modal-head">
           <div className="rwl-admin-detail-title">
@@ -612,7 +716,7 @@ function SubmissionModal({
               <strong>{isContact ? contact.subject : `${assessment.stream} assessment`}</strong>
               {formatDate(item.created_at)}
             </div>
-            <button className="rwl-admin-modal-close" type="button" onClick={onClose} aria-label="Close" data-testid="button-close-modal"><X size={17} /></button>
+            <button className="rwl-admin-modal-close" type="button" onClick={requestClose} aria-label="Close" data-testid="button-close-modal"><X size={17} /></button>
           </div>
         </div>
 
@@ -658,10 +762,35 @@ function SubmissionModal({
             <label htmlFor="submission-notes">Private notes</label>
             <textarea id="submission-notes" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Add a note for your team..." />
           </div>
-          <button className="rwl-admin-button" type="button" disabled={saving} onClick={onSave}><Save size={14} /> {saving ? 'Saving...' : 'Save changes'}</button>
+          <button className="rwl-admin-button" type="button" disabled={saving || !isDirty} onClick={() => void onSave()} data-testid="button-save-record">
+            <Save size={14} /> {saving ? 'Saving...' : isDirty ? 'Save changes' : 'Saved'}
+          </button>
           {saveError && <div className="rwl-admin-inline-feedback error"><AlertCircle size={14} /> {saveError}</div>}
           {saved && !saveError && <div className="rwl-admin-inline-feedback"><CheckCircle2 size={14} /> Changes saved for your team.</div>}
         </div>
+
+        {confirmingClose && (
+          <div className="rwl-admin-confirm" role="alertdialog" aria-label="Unsaved changes">
+            <div className="rwl-admin-confirm-card">
+              <AlertCircle size={19} />
+              <h3>Save your changes?</h3>
+              <p>You changed this submission but have not saved it yet.</p>
+              <div className="rwl-admin-confirm-actions">
+                <button
+                  className="rwl-admin-button"
+                  type="button"
+                  disabled={saving}
+                  onClick={() => { void onSave().then((ok) => { if (ok) onClose(); else setConfirmingClose(false); }); }}
+                  data-testid="button-confirm-save-close"
+                >
+                  <Save size={14} /> {saving ? 'Saving...' : 'Save and close'}
+                </button>
+                <button className="rwl-admin-ghost-button" type="button" onClick={onClose} data-testid="button-discard-close">Discard</button>
+                <button className="rwl-admin-ghost-button" type="button" onClick={() => setConfirmingClose(false)} data-testid="button-cancel-close">Keep editing</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -839,67 +968,16 @@ function LinkingBoxPanel({
   );
 }
 
-type SettingEntry = { id: string; key: string; value: string };
-
-function SettingsPanel({
-  entries,
-  setEntries,
-  loading,
-  saving,
-  error,
-  saved,
-  onSave,
-  onRetry,
-}: {
-  entries: SettingEntry[];
-  setEntries: (entries: SettingEntry[]) => void;
-  loading: boolean;
-  saving: boolean;
-  error: string;
-  saved: boolean;
-  onSave: () => void;
-  onRetry: () => void;
-}) {
-  if (loading) return <div className="rwl-admin-detail-skeleton" aria-label="Loading settings" />;
-  if (error) {
-    return <div className="rwl-admin-error"><div><div className="rwl-admin-error-icon"><AlertCircle size={20} /></div><h3>Settings could not load</h3><p>{error}</p><button className="rwl-admin-button" type="button" onClick={onRetry}><RefreshCw size={14} /> Try again</button></div></div>;
-  }
-  return (
-    <div className="rwl-admin-settings">
-      <div className="rwl-admin-settings-intro">
-        <div><h2>Workspace settings</h2><p>Keep the small operational details in one place. Changes apply to the public experience wherever these settings are used.</p></div>
-        <SlidersHorizontal size={21} color="#6e8d80" />
-      </div>
-      {entries.length === 0 ? (
-        <div className="rwl-admin-empty" style={{ minHeight: 220, padding: 0 }}><div><div className="rwl-admin-empty-icon"><Settings size={20} /></div><h3>No settings returned</h3><p>There are no editable settings available yet.</p></div></div>
-      ) : (
-        <div className="rwl-admin-setting-list">
-          {entries.map((entry) => (
-            <div className="rwl-admin-setting-row" key={entry.id}>
-              <div className="rwl-admin-setting-key">{entry.key || 'new_setting'}</div>
-              <input className="rwl-admin-setting-input" aria-label={`Value for ${entry.key || 'new setting'}`} value={entry.value} onChange={(event) => setEntries(entries.map((current) => current.id === entry.id ? { ...current, value: event.target.value } : current))} />
-              <button className="rwl-admin-icon-button" type="button" aria-label={`Remove ${entry.key || 'setting'}`} onClick={() => setEntries(entries.filter((current) => current.id !== entry.id))}><Trash2 size={14} /></button>
-            </div>
-          ))}
-        </div>
-      )}
-      <div className="rwl-admin-settings-actions">
-        <button className="rwl-admin-button secondary" type="button" onClick={() => setEntries([...entries, { id: `new-${Date.now()}`, key: '', value: '' }])}><Plus size={14} /> Add setting</button>
-        <button className="rwl-admin-button" type="button" disabled={saving || entries.length === 0} onClick={onSave}><Save size={14} /> {saving ? 'Saving…' : 'Save settings'}</button>
-      </div>
-      {error && <div className="rwl-admin-inline-feedback error"><AlertCircle size={14} /> {error}</div>}
-      {saved && !error && <div className="rwl-admin-inline-feedback"><Check size={14} /> Settings saved.</div>}
-    </div>
-  );
-}
-
 function AdminWorkspace({ adminEmail, onLogout }: { adminEmail: string; onLogout: () => void }) {
-  const [tab, setTab] = useState<WorkspaceTab>('submissions');
-  const [filter, setFilter] = useState<SubmissionFilter>('all');
+  const [tab, setTab] = useState<WorkspaceTab>('dashboard');
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
   const [assessments, setAssessments] = useState<AssessmentSubmission[]>([]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [boxFilter, setBoxFilter] = useState<'all' | BoxStatus>('all');
+  // What the record looked like when it was opened, so closing can tell
+  // whether anything actually changed.
+  const [baseline, setBaseline] = useState({ status: '' as string, notes: '' });
   const [status, setStatus] = useState<ContactStatus | AssessmentStatus>('new');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(true);
@@ -907,16 +985,16 @@ function AdminWorkspace({ adminEmail, onLogout }: { adminEmail: string; onLogout
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saved, setSaved] = useState(false);
-  const [settingsEntries, setSettingsEntries] = useState<SettingEntry[]>([]);
-  const [settingsLoading, setSettingsLoading] = useState(true);
-  const [settingsSaving, setSettingsSaving] = useState(false);
-  const [settingsError, setSettingsError] = useState('');
-  const [settingsSaved, setSettingsSaved] = useState(false);
-
-  const allRecords = useMemo<AdminRecord[]>(() => [
-    ...contacts.map((item) => ({ kind: 'contact' as const, item })),
-    ...assessments.map((item) => ({ kind: 'assessment' as const, item })),
-  ].sort((a, b) => new Date(b.item.created_at).getTime() - new Date(a.item.created_at).getTime()), [contacts, assessments]);
+  // The sidebar decides which kind of record is on screen; the search box and
+  // the delivery filter narrow it from there.
+  const allRecords = useMemo<AdminRecord[]>(() => {
+    const source: AdminRecord[] = tab === 'contacts'
+      ? contacts.map((item) => ({ kind: 'contact' as const, item }))
+      : assessments
+        .filter((item) => boxFilter === 'all' || item.box_status === boxFilter)
+        .map((item) => ({ kind: 'assessment' as const, item }));
+    return source.sort((a, b) => new Date(b.item.created_at).getTime() - new Date(a.item.created_at).getTime());
+  }, [tab, contacts, assessments, boxFilter]);
   // Free-text search across the fields an admin would actually recall:
   // who they are, how to reach them, where they are and what came back.
   const records = useMemo(() => {
@@ -936,7 +1014,9 @@ function AdminWorkspace({ adminEmail, onLogout }: { adminEmail: string; onLogout
     setLoading(true);
     setLoadError('');
     try {
-      const response = await api.get<SubmissionsResponse>(`/api/admin/submissions?type=${filter}`);
+      // Always fetch both kinds: the dashboard counts them together and the
+      // sidebar switches between them without another round trip.
+      const response = await api.get<SubmissionsResponse>('/api/admin/submissions?type=all');
       setContacts(response.contacts ?? []);
       setAssessments(response.assessments ?? []);
     } catch (error) {
@@ -944,37 +1024,27 @@ function AdminWorkspace({ adminEmail, onLogout }: { adminEmail: string; onLogout
     } finally {
       setLoading(false);
     }
-  }, [filter]);
-
-  const loadSettings = useCallback(async () => {
-    setSettingsLoading(true);
-    setSettingsError('');
-    try {
-      const response = await api.get<SettingsResponse>('/api/admin/settings');
-      setSettingsEntries(Object.entries(response.settings ?? {}).map(([key, value]) => ({ id: key, key, value })));
-    } catch (error) {
-      setSettingsError(error instanceof Error ? error.message : 'Settings could not load.');
-    } finally {
-      setSettingsLoading(false);
-    }
   }, []);
 
   useEffect(() => { void loadSubmissions(); }, [loadSubmissions]);
-  useEffect(() => { void loadSettings(); }, [loadSettings]);
+  // Load the selected record into the editable fields. Nothing is selected on
+  // arrival: the popup opens only when someone presses View, so landing on the
+  // workspace never puts a dialog in the way.
   useEffect(() => {
-    if (selectedRecord) {
-      setStatus(selectedRecord.item.status);
-      setNotes(selectedRecord.item.notes ?? '');
-      setSaveError('');
-      setSaved(false);
-    } else if (records.length > 0) {
-      const first = records[0];
-      setSelectedKey(`${first.kind}-${first.item.id}`);
-    }
-  }, [records, selectedRecord]);
-
-  const saveRecord = async () => {
     if (!selectedRecord) return;
+    const nextStatus = selectedRecord.item.status;
+    const nextNotes = selectedRecord.item.notes ?? '';
+    setStatus(nextStatus);
+    setNotes(nextNotes);
+    setBaseline({ status: nextStatus, notes: nextNotes });
+    setSaveError('');
+    setSaved(false);
+  }, [selectedRecord]);
+
+  // Returns whether the save succeeded so "Save and close" knows not to close
+  // on failure and lose what was typed.
+  const saveRecord = async () => {
+    if (!selectedRecord) return false;
     setSaving(true);
     setSaveError('');
     setSaved(false);
@@ -986,31 +1056,14 @@ function AdminWorkspace({ adminEmail, onLogout }: { adminEmail: string; onLogout
       } else {
         setAssessments((current) => current.map((item) => item.id === selectedRecord.item.id ? { ...item, status: status as AssessmentStatus, notes } : item));
       }
+      setBaseline({ status, notes });
       setSaved(true);
+      return true;
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : 'Changes could not be saved.');
+      return false;
     } finally {
       setSaving(false);
-    }
-  };
-
-  const saveSettings = async () => {
-    const settings: Record<string, string> = {};
-    settingsEntries.forEach((entry) => {
-      const key = entry.key.trim();
-      if (key) settings[key] = entry.value;
-    });
-    setSettingsSaving(true);
-    setSettingsError('');
-    setSettingsSaved(false);
-    try {
-      const response = await api.put<SettingsResponse>('/api/admin/settings', { settings });
-      setSettingsEntries(Object.entries(response.settings ?? settings).map(([key, value]) => ({ id: key, key, value })));
-      setSettingsSaved(true);
-    } catch (error) {
-      setSettingsError(error instanceof Error ? error.message : 'Settings could not be saved.');
-    } finally {
-      setSettingsSaving(false);
     }
   };
 
@@ -1022,75 +1075,84 @@ function AdminWorkspace({ adminEmail, onLogout }: { adminEmail: string; onLogout
         <div className="rwl-admin-brand"><span className="rwl-admin-brand-word">REAL WORLD LINK</span><span className="rwl-admin-brand-sub">IN SHORTS BY AAFIYA &amp; SANA</span></div>
         <div className="rwl-admin-rail-label">Control room</div>
         <nav className="rwl-admin-nav" aria-label="Admin sections">
-          <button className={`rwl-admin-nav-button ${tab === 'submissions' ? 'active' : ''}`} type="button" onClick={() => setTab('submissions')}><LayoutDashboard size={17} /><span>Submissions</span></button>
-          <button className={`rwl-admin-nav-button ${tab === 'settings' ? 'active' : ''}`} type="button" onClick={() => setTab('settings')}><Settings size={17} /><span>Settings</span></button>
+          <button className={`rwl-admin-nav-button ${tab === 'dashboard' ? 'active' : ''}`} type="button" onClick={() => setTab('dashboard')} data-testid="nav-dashboard"><LayoutDashboard size={17} /><span>Dashboard</span></button>
+          <button className={`rwl-admin-nav-button ${tab === 'students' ? 'active' : ''}`} type="button" onClick={() => setTab('students')} data-testid="nav-students"><UserRound size={17} /><span>Students</span></button>
+          <button className={`rwl-admin-nav-button ${tab === 'contacts' ? 'active' : ''}`} type="button" onClick={() => setTab('contacts')} data-testid="nav-contacts"><Mail size={17} /><span>Contacts</span>{contacts.length > 0 && <em className="rwl-admin-nav-count">{contacts.length}</em>}</button>
         </nav>
         <div className="rwl-admin-sidebar-foot"><small>Signed in as</small><strong>{adminEmail}</strong></div>
       </aside>
       <div className="rwl-admin-main">
         <header className="rwl-admin-topbar">
-          <div><div className="rwl-admin-topbar-kicker">Real World Link · Private workspace</div><div className="rwl-admin-topbar-title">{tab === 'submissions' ? 'Submission desk' : 'Workspace settings'}</div></div>
+          <div><div className="rwl-admin-topbar-kicker">Real World Link · Private workspace</div><div className="rwl-admin-topbar-title">{tab === 'dashboard' ? 'Dashboard' : tab === 'students' ? 'Students' : 'Contact messages'}</div></div>
           <div className="rwl-admin-topbar-actions">
-            {tab === 'submissions' && <button className="rwl-admin-icon-button" type="button" aria-label="Refresh submissions" onClick={() => void loadSubmissions()}><RefreshCw size={15} /></button>}
+            <button className="rwl-admin-icon-button" type="button" aria-label="Refresh" onClick={() => void loadSubmissions()}><RefreshCw size={15} /></button>
             <button className="rwl-admin-logout" type="button" onClick={onLogout}><LogOut size={14} /><span>Sign out</span></button>
           </div>
         </header>
         <main className="rwl-admin-content">
-          {tab === 'submissions' ? (
-            <>
-              <section className="rwl-admin-overview">
-                <div><h1>Keep curiosity moving.</h1><p>Review what students are asking, notice where they may need a little more context and give every message the attention it deserves.</p></div>
-                <div className="rwl-admin-overview-note"><Clock3 size={15} /> A human inbox, not a queue.</div>
-              </section>
-              <section className="rwl-admin-stat-grid" aria-label="Submission summary">
-                <div className="rwl-admin-stat primary"><span className="rwl-admin-stat-label"><ClipboardList size={14} /> All submissions</span><strong className="rwl-admin-stat-value">{loading ? '—' : total}</strong></div>
-                <div className="rwl-admin-stat"><span className="rwl-admin-stat-label"><Mail size={14} /> Contact messages</span><strong className="rwl-admin-stat-value">{loading ? '—' : contacts.length}</strong></div>
-                <div className="rwl-admin-stat"><span className="rwl-admin-stat-label"><FileText size={14} /> Assessments</span><strong className="rwl-admin-stat-value">{loading ? '—' : assessments.length}</strong></div>
-                <div className="rwl-admin-stat"><span className="rwl-admin-stat-label"><AlertCircle size={14} /> Need attention</span><strong className="rwl-admin-stat-value">{loading ? '—' : newCount}</strong></div>
-              </section>
-              <section className="rwl-admin-workspace">
-                <div className="rwl-admin-panel">
-                  <div className="rwl-admin-panel-head"><div><h2>Students &amp; messages</h2><p>{loading ? 'Gathering the latest entries…' : `${records.length} of ${allRecords.length} shown`}</p></div><UserRound size={18} color="#739287" /></div>
-                  <div className="rwl-admin-list-controls">
-                    <div className="rwl-admin-search">
-                      <Search size={15} />
-                      <input
-                        type="search"
-                        value={search}
-                        onChange={(event) => setSearch(event.target.value)}
-                        placeholder="Search by name, email, city, school, phone or result…"
-                        aria-label="Search submissions"
-                        data-testid="input-admin-search"
-                      />
-                      {search && <button type="button" onClick={() => setSearch('')} aria-label="Clear search"><X size={14} /></button>}
-                    </div>
-                    <div className="rwl-admin-filter-bar" aria-label="Submission filters">
-                      {(['all', 'contact', 'assessment'] as SubmissionFilter[]).map((option) => <button className={`rwl-admin-filter ${filter === option ? 'active' : ''}`} key={option} type="button" onClick={() => setFilter(option)}>{option === 'all' ? 'All' : option === 'contact' ? 'Contacts' : 'Assessments'}</button>)}
-                    </div>
+          {tab === 'dashboard' && <DashboardPanel contacts={contacts} assessments={assessments} loading={loading} onOpenStudents={() => setTab('students')} />}
+
+          {tab !== 'dashboard' && (
+            <section className="rwl-admin-workspace">
+              <div className="rwl-admin-panel">
+                <div className="rwl-admin-panel-head">
+                  <div>
+                    <h2>{tab === 'students' ? 'Students' : 'Contact messages'}</h2>
+                    <p>{loading ? 'Gathering the latest entries...' : `${records.length} of ${allRecords.length} shown`}</p>
                   </div>
-                  {loading ? <LoadingList /> : loadError ? <div className="rwl-admin-error"><div><div className="rwl-admin-error-icon"><AlertCircle size={20} /></div><h3>Submissions could not load</h3><p>{loadError}</p><button className="rwl-admin-button" type="button" onClick={() => void loadSubmissions()}><RefreshCw size={14} /> Try again</button></div></div>
-                    : records.length === 0 && search ? <EmptyState message={`Nothing matches “${search}”. Try a different name, city or email.`} />
-                    : <RecordList records={records} selectedKey={selectedKey} onSelect={(record) => setSelectedKey(`${record.kind}-${record.item.id}`)} />}
+                  {tab === 'students' ? <UserRound size={18} color="#739287" /> : <Mail size={18} color="#739287" />}
                 </div>
-              </section>
-              {selectedRecord && (
-                <SubmissionModal
-                  record={selectedRecord}
-                  status={status}
-                  notes={notes}
-                  setStatus={setStatus}
-                  setNotes={setNotes}
-                  saving={saving}
-                  saveError={saveError}
-                  saved={saved}
-                  onSave={() => void saveRecord()}
-                  onBoxUpdated={(updated) => setAssessments((current) => current.map((entry) => entry.id === updated.id ? updated : entry))}
-                  onClose={() => setSelectedKey(null)}
-                />
-              )}
-            </>
-          ) : (
-            <section className="rwl-admin-panel"><SettingsPanel entries={settingsEntries} setEntries={setSettingsEntries} loading={settingsLoading} saving={settingsSaving} error={settingsError} saved={settingsSaved} onSave={() => void saveSettings()} onRetry={() => void loadSettings()} /></section>
+                <div className="rwl-admin-list-controls">
+                  <div className="rwl-admin-search">
+                    <Search size={15} />
+                    <input
+                      type="search"
+                      value={search}
+                      onChange={(event) => setSearch(event.target.value)}
+                      placeholder={tab === 'students' ? 'Search by name, email, city, school, phone or result' : 'Search by name, email or subject'}
+                      aria-label="Search submissions"
+                      data-testid="input-admin-search"
+                    />
+                    {search && <button type="button" onClick={() => setSearch('')} aria-label="Clear search"><X size={14} /></button>}
+                  </div>
+                  {tab === 'students' && (
+                    <div className="rwl-admin-filter-bar" aria-label="Delivery status filter">
+                      {(['all', ...boxSteps.map((step) => step.key)] as ('all' | BoxStatus)[]).map((option) => (
+                        <button
+                          className={`rwl-admin-filter ${boxFilter === option ? 'active' : ''}`}
+                          key={option}
+                          type="button"
+                          onClick={() => setBoxFilter(option)}
+                        >
+                          {option === 'all' ? 'All' : boxStatusLabels[option]}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {loading ? <LoadingList />
+                  : loadError ? <div className="rwl-admin-error"><div><div className="rwl-admin-error-icon"><AlertCircle size={20} /></div><h3>Submissions could not load</h3><p>{loadError}</p><button className="rwl-admin-button" type="button" onClick={() => void loadSubmissions()}><RefreshCw size={14} /> Try again</button></div></div>
+                  : records.length === 0 ? <EmptyState message={search || boxFilter !== 'all' ? 'Nothing matches this search or filter yet.' : tab === 'students' ? 'Completed assessments will appear here.' : 'Contact messages will appear here.'} />
+                  : <RecordList records={records} selectedKey={selectedKey} onSelect={(record) => setSelectedKey(`${record.kind}-${record.item.id}`)} />}
+              </div>
+            </section>
+          )}
+
+          {selectedRecord && (
+            <SubmissionModal
+              record={selectedRecord}
+              status={status}
+              notes={notes}
+              setStatus={setStatus}
+              setNotes={setNotes}
+              saving={saving}
+              saveError={saveError}
+              saved={saved}
+              onSave={saveRecord}
+              isDirty={status !== baseline.status || notes !== baseline.notes}
+              onBoxUpdated={(updated) => setAssessments((current) => current.map((entry) => entry.id === updated.id ? updated : entry))}
+              onClose={() => setSelectedKey(null)}
+            />
           )}
         </main>
       </div>
