@@ -2,13 +2,10 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { initializeDatabase } from "./lib/mysql";
 
-const rawPort = process.env["PORT"];
-
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
+// Hosts usually inject PORT. Falling back to 3000 rather than throwing means a
+// host that starts the app without it still comes up instead of crash-looping
+// with nothing useful in the logs.
+const rawPort = process.env["PORT"] ?? "3000";
 
 const port = Number(rawPort);
 
