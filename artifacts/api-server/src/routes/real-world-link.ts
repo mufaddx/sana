@@ -1,6 +1,6 @@
 import { createHash, createHmac, randomBytes, randomInt, timingSafeEqual } from "node:crypto";
 import { Router, type IRouter, type NextFunction, type Request, type Response } from "express";
-import { type ResultSetHeader, type RowDataPacket } from "mysql2/promise";
+import { type Pool, type ResultSetHeader, type RowDataPacket } from "mysql2/promise";
 import { databaseConfigured, getPool } from "../lib/mysql";
 import {
   mailConfigured,
@@ -124,31 +124,31 @@ function newTrackingCode() {
 }
 
 // The tracking code is the only credential on the student dashboard, so failed
-// lookups are throttled per IP to keep guessing impractical.
-const TRACK_WINDOW_MS = 60 * 1000;
+// lookups are throttled per IP. The counter lives in the database rather than
+// in memory because the host runs several worker processes; an in-memory
+// counter would let each worker allow the full quota on its own.
+const TRACK_WINDOW_SECONDS = 60;
 const TRACK_MAX_FAILURES = 10;
-const trackFailures = new Map<string, { count: number; resetAt: number }>();
 
-function trackLookupBlocked(ip: string) {
-  const entry = trackFailures.get(ip);
-  if (!entry || entry.resetAt <= Date.now()) return false;
-  return entry.count >= TRACK_MAX_FAILURES;
+async function trackLookupBlocked(db: Pool, ip: string) {
+  const [rows] = await db.execute<DatabaseRow[]>(
+    `SELECT failures FROM rwl_track_lookup_failures
+      WHERE client_ip = ? AND window_started_at > UTC_TIMESTAMP(3) - INTERVAL ? SECOND LIMIT 1`,
+    [ip, TRACK_WINDOW_SECONDS],
+  );
+  return Number(rows[0]?.failures ?? 0) >= TRACK_MAX_FAILURES;
 }
 
-function recordTrackFailure(ip: string) {
-  const now = Date.now();
-  const entry = trackFailures.get(ip);
-  if (!entry || entry.resetAt <= now) {
-    trackFailures.set(ip, { count: 1, resetAt: now + TRACK_WINDOW_MS });
-    return;
-  }
-  entry.count += 1;
-  // Opportunistic cleanup so the map cannot grow without bound.
-  if (trackFailures.size > 5000) {
-    for (const [key, value] of trackFailures) {
-      if (value.resetAt <= now) trackFailures.delete(key);
-    }
-  }
+async function recordTrackFailure(db: Pool, ip: string) {
+  // Restart the count when the previous window has passed, otherwise add to it.
+  await db.execute(
+    `INSERT INTO rwl_track_lookup_failures (client_ip, failures, window_started_at)
+       VALUES (?, 1, UTC_TIMESTAMP(3))
+     ON DUPLICATE KEY UPDATE
+       failures = IF(window_started_at > UTC_TIMESTAMP(3) - INTERVAL ? SECOND, failures + 1, 1),
+       window_started_at = IF(window_started_at > UTC_TIMESTAMP(3) - INTERVAL ? SECOND, window_started_at, UTC_TIMESTAMP(3))`,
+    [ip, TRACK_WINDOW_SECONDS, TRACK_WINDOW_SECONDS],
+  );
 }
 
 function publicBaseUrl() {
@@ -319,23 +319,23 @@ router.get("/public/track/:code", async (req, res) => {
   const db = requireDatabase(res);
   if (!db) return;
   const clientIp = req.ip ?? "unknown";
-  if (trackLookupBlocked(clientIp)) {
-    res.status(429).json({ message: "Too many attempts. Please wait a minute and try again." });
-    return;
-  }
   const code = String(req.params.code || "");
-  if (!/^[A-Za-z0-9_-]{10,32}$/.test(code)) {
-    recordTrackFailure(clientIp);
-    res.status(404).json({ message: "That tracking code was not found." });
-    return;
-  }
   try {
+    if (await trackLookupBlocked(db, clientIp)) {
+      res.status(429).json({ message: "Too many attempts. Please wait a minute and try again." });
+      return;
+    }
+    if (!/^[A-Za-z0-9_-]{10,32}$/.test(code)) {
+      await recordTrackFailure(db, clientIp);
+      res.status(404).json({ message: "That tracking code was not found." });
+      return;
+    }
     const [rows] = await db.execute<DatabaseRow[]>(
       `SELECT ${ASSESSMENT_COLUMNS} FROM rwl_assessment_submissions WHERE tracking_code = ? LIMIT 1`,
       [code],
     );
     if (rows.length === 0) {
-      recordTrackFailure(clientIp);
+      await recordTrackFailure(db, clientIp);
       res.status(404).json({ message: "That tracking code was not found." });
       return;
     }

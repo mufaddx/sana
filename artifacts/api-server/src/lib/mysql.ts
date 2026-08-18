@@ -91,6 +91,13 @@ const schemaStatements = [
     PRIMARY KEY (session_hash),
     INDEX idx_rwl_session_expiry (expires_at)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+  `CREATE TABLE IF NOT EXISTS rwl_track_lookup_failures (
+    client_ip VARCHAR(45) NOT NULL,
+    failures INT UNSIGNED NOT NULL DEFAULT 0,
+    window_started_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (client_ip),
+    INDEX idx_rwl_track_window (window_started_at)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
   `CREATE TABLE IF NOT EXISTS rwl_site_settings (
     setting_key VARCHAR(120) NOT NULL,
     setting_value TEXT NOT NULL,
@@ -185,5 +192,6 @@ export async function initializeDatabase() {
   await applyPendingMigrations(db);
   await db.query("DELETE FROM rwl_admin_otp_challenges WHERE expires_at < UTC_TIMESTAMP(3)");
   await db.query("DELETE FROM rwl_admin_sessions WHERE expires_at < UTC_TIMESTAMP(3)");
+  await db.query("DELETE FROM rwl_track_lookup_failures WHERE window_started_at < UTC_TIMESTAMP(3) - INTERVAL 1 HOUR");
   logger.info("MySQL schema is ready");
 }
