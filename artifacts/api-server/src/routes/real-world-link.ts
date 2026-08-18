@@ -116,6 +116,41 @@ function readDateOnly(value: unknown, field: string) {
   return raw;
 }
 
+// A 10-digit numeric code is short enough for a student to read off an email
+// and type by hand. It is drawn at random rather than counted up, so one code
+// never reveals another, and lookups are rate limited below.
+function newTrackingCode() {
+  return String(randomInt(1_000_000_000, 10_000_000_000));
+}
+
+// The tracking code is the only credential on the student dashboard, so failed
+// lookups are throttled per IP to keep guessing impractical.
+const TRACK_WINDOW_MS = 60 * 1000;
+const TRACK_MAX_FAILURES = 10;
+const trackFailures = new Map<string, { count: number; resetAt: number }>();
+
+function trackLookupBlocked(ip: string) {
+  const entry = trackFailures.get(ip);
+  if (!entry || entry.resetAt <= Date.now()) return false;
+  return entry.count >= TRACK_MAX_FAILURES;
+}
+
+function recordTrackFailure(ip: string) {
+  const now = Date.now();
+  const entry = trackFailures.get(ip);
+  if (!entry || entry.resetAt <= now) {
+    trackFailures.set(ip, { count: 1, resetAt: now + TRACK_WINDOW_MS });
+    return;
+  }
+  entry.count += 1;
+  // Opportunistic cleanup so the map cannot grow without bound.
+  if (trackFailures.size > 5000) {
+    for (const [key, value] of trackFailures) {
+      if (value.resetAt <= now) trackFailures.delete(key);
+    }
+  }
+}
+
 function publicBaseUrl() {
   return envValue("PUBLIC_BASE_URL").replace(/\/+$/, "");
 }
@@ -241,14 +276,26 @@ router.post("/public/assessment", async (req, res) => {
     const addressLine = readText(req.body?.address, "Address", 255);
     const state = readText(req.body?.state, "State", 120);
     const pincode = readPincode(req.body?.pincode);
-    // Long random code: this is the only secret guarding the student dashboard.
-    const trackingCode = randomBytes(16).toString("base64url");
-    const [insertResult] = await db.execute<ResultSetHeader>(
-      `INSERT INTO rwl_assessment_submissions
-        (name, email, grade, city, school, stream, result, answers, phone, address_line, state, pincode, tracking_code)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, email, grade, city, school, stream, result || null, JSON.stringify(answers), phone, addressLine, state, pincode, trackingCode],
-    );
+    // Retry on the (very unlikely) chance a code is already taken.
+    let trackingCode = "";
+    let insertResult: ResultSetHeader | null = null;
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      trackingCode = newTrackingCode();
+      try {
+        const [inserted] = await db.execute<ResultSetHeader>(
+          `INSERT INTO rwl_assessment_submissions
+            (name, email, grade, city, school, stream, result, answers, phone, address_line, state, pincode, tracking_code)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [name, email, grade, city, school, stream, result || null, JSON.stringify(answers), phone, addressLine, state, pincode, trackingCode],
+        );
+        insertResult = inserted;
+        break;
+      } catch (error) {
+        const duplicate = (error as { code?: string }).code === "ER_DUP_ENTRY";
+        if (!duplicate || attempt === 4) throw error;
+      }
+    }
+    if (!insertResult) throw new Error("Assessment could not be saved.");
     const notifications = await Promise.allSettled([
       sendSubmissionConfirmation({ email, name, kind: "assessment", trackingUrl: trackingUrl(trackingCode) }),
       sendAdminNotification({
@@ -271,8 +318,14 @@ router.post("/public/assessment", async (req, res) => {
 router.get("/public/track/:code", async (req, res) => {
   const db = requireDatabase(res);
   if (!db) return;
+  const clientIp = req.ip ?? "unknown";
+  if (trackLookupBlocked(clientIp)) {
+    res.status(429).json({ message: "Too many attempts. Please wait a minute and try again." });
+    return;
+  }
   const code = String(req.params.code || "");
   if (!/^[A-Za-z0-9_-]{10,32}$/.test(code)) {
+    recordTrackFailure(clientIp);
     res.status(404).json({ message: "That tracking code was not found." });
     return;
   }
@@ -282,6 +335,7 @@ router.get("/public/track/:code", async (req, res) => {
       [code],
     );
     if (rows.length === 0) {
+      recordTrackFailure(clientIp);
       res.status(404).json({ message: "That tracking code was not found." });
       return;
     }

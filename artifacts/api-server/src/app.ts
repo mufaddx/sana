@@ -10,6 +10,12 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+// One reverse proxy sits in front in production (LiteSpeed on Hostinger), so
+// trust a single hop of X-Forwarded-For. Without this every request looks like
+// it came from the proxy and per-IP rate limiting would apply to everyone at
+// once; trusting all hops instead would let a client spoof its address.
+app.set("trust proxy", 1);
+
 // Built single-page app. In production one process serves both the API and the
 // site, so the browser can call /api/... on its own origin.
 const serverDir = path.dirname(fileURLToPath(import.meta.url));

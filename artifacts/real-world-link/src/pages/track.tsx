@@ -151,15 +151,16 @@ export default function TrackPage() {
           <div className="assessment-page reveal">
             <div className="eyebrow">Your Linking Box</div>
             <h1>Track your box.</h1>
-            <p>Enter the tracking code we emailed you after your assessment. It opens your personal dashboard.</p>
+            <p>Enter the 10-digit tracking code we emailed you after your assessment. It opens your personal dashboard.</p>
             <form className="info-form" onSubmit={openCode}>
               <div className="field">
                 <label htmlFor="tracking-code">Tracking code</label>
                 <input
                   id="tracking-code"
                   value={code}
-                  onChange={(event) => setCode(event.target.value)}
-                  placeholder="Paste your code here"
+                  onChange={(event) => setCode(event.target.value.trim())}
+                  inputMode="numeric"
+                  placeholder="For example, 4820375916"
                   autoComplete="off"
                   data-testid="input-tracking-code"
                 />
