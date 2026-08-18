@@ -1,0 +1,1 @@
+- [RWL admin security](rwl-admin-security.md) — Admin OTP and MySQL persistence must use environment secrets; never reuse credentials pasted into chat.
