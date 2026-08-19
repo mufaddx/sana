@@ -359,7 +359,21 @@
 
 /* Instagram follow prompt, shown once on the home page */
 .ig-modal { position: relative; width: min(100%, 430px); padding: 32px 28px 26px; border: 1px solid hsl(var(--border)); border-radius: 20px; background: hsl(var(--card)); text-align: center; animation: modalIn .25s ease both; }
-.ig-mark { width: 54px; height: 54px; margin: 0 auto 16px; display: grid; place-items: center; border-radius: 15px; background: #fdeef4; color: #c13584; }
+/* Animated in CSS rather than shipped as a GIF: no extra request, stays sharp
+   at any size, and the reduced-motion rule at the end of this file stops it
+   for anyone who asks the browser for less movement. */
+.ig-laugh { font-size: 3.4rem; line-height: 1; margin: 0 auto 14px; width: max-content; transform-origin: 50% 85%; animation: laugh 1.25s ease-in-out infinite; }
+@keyframes laugh {
+  0%   { transform: rotate(-9deg) translateY(0)    scale(1); }
+  12%  { transform: rotate(8deg)  translateY(-6px) scale(1.08); }
+  26%  { transform: rotate(-7deg) translateY(0)    scale(1); }
+  38%  { transform: rotate(7deg)  translateY(-5px) scale(1.06); }
+  52%  { transform: rotate(-6deg) translateY(0)    scale(1); }
+  64%  { transform: rotate(5deg)  translateY(-3px) scale(1.04); }
+  78%  { transform: rotate(-4deg) translateY(0)    scale(1); }
+  90%  { transform: rotate(3deg)  translateY(-2px) scale(1.02); }
+  100% { transform: rotate(-9deg) translateY(0)    scale(1); }
+}
 .ig-modal h2 { font-size: 1.45rem; letter-spacing: -.045em; margin: 0 0 10px; }
 .ig-modal p { color: hsl(var(--muted-foreground)); font-size: .85rem; line-height: 1.7; margin: 0; }
 .ig-actions { display: grid; gap: 10px; margin: 22px 0 14px; }

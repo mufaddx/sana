@@ -234,7 +234,7 @@ function InstagramPopup() {
   return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
     <div className="ig-modal" role="dialog" aria-modal="true" aria-labelledby="ig-modal-title">
       <button className="modal-close" onClick={close} aria-label="Close" data-testid="button-close-instagram"><X size={18} /></button>
-      <div className="ig-mark"><Instagram size={26} /></div>
+      <div className="ig-laugh" role="img" aria-label="Laughing face" data-testid="emoji-laugh">😂</div>
       <div className="eyebrow section-kicker">Before you start</div>
       <h2 id="ig-modal-title">Follow us on Instagram.</h2>
       <p>We share student stories, skill ideas and what goes into every Linking Box. Give us a follow so you do not miss it.</p>
