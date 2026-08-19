@@ -523,8 +523,11 @@
   .faq-contact-card { padding: 22px 18px 18px; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
   .footer-grid > :first-child { grid-column: 1 / -1; }
-  .footer-bottom { display: block; line-height: 1.7; }
-  .footer-bottom span { display: block; }
+  /* Keep the copyright and the by-line on opposite edges on narrow screens
+     too; each side wraps within itself rather than stacking one above the other. */
+  .footer-bottom { gap: 14px; align-items: flex-start; line-height: 1.5; font-size: .62rem; }
+  .footer-bottom span { flex: 0 1 auto; }
+  .footer-bottom span:last-child { text-align: right; }
   .back-top { display: none; }
   .modal-backdrop { padding: 0; align-items: end; }
   .career-modal { max-height: 92dvh; border-radius: 25px 25px 0 0; padding: 28px 22px 34px; }
