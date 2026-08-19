@@ -357,33 +357,6 @@
 .not-found h1 { font-size: clamp(4rem, 12vw, 8rem); line-height: 1; color: hsl(var(--primary)); margin: 0; letter-spacing: -.09em; }
 .not-found p { color: hsl(var(--muted-foreground)); margin: 12px 0 24px; }
 
-/* Instagram follow prompt, shown once on the home page */
-.ig-modal { position: relative; width: min(100%, 430px); padding: 32px 28px 26px; border: 1px solid hsl(var(--border)); border-radius: 20px; background: hsl(var(--card)); text-align: center; animation: modalIn .25s ease both; }
-/* Animated in CSS rather than shipped as a GIF: no extra request, stays sharp
-   at any size, and the reduced-motion rule at the end of this file stops it
-   for anyone who asks the browser for less movement. */
-.ig-laugh { font-size: 3.4rem; line-height: 1; margin: 0 auto 14px; width: max-content; transform-origin: 50% 85%; animation: laugh 1.25s ease-in-out infinite; }
-@keyframes laugh {
-  0%   { transform: rotate(-9deg) translateY(0)    scale(1); }
-  12%  { transform: rotate(8deg)  translateY(-6px) scale(1.08); }
-  26%  { transform: rotate(-7deg) translateY(0)    scale(1); }
-  38%  { transform: rotate(7deg)  translateY(-5px) scale(1.06); }
-  52%  { transform: rotate(-6deg) translateY(0)    scale(1); }
-  64%  { transform: rotate(5deg)  translateY(-3px) scale(1.04); }
-  78%  { transform: rotate(-4deg) translateY(0)    scale(1); }
-  90%  { transform: rotate(3deg)  translateY(-2px) scale(1.02); }
-  100% { transform: rotate(-9deg) translateY(0)    scale(1); }
-}
-.ig-modal h2 { font-size: 1.45rem; letter-spacing: -.045em; margin: 0 0 10px; }
-.ig-modal p { color: hsl(var(--muted-foreground)); font-size: .85rem; line-height: 1.7; margin: 0; }
-.ig-actions { display: grid; gap: 10px; margin: 22px 0 14px; }
-.ig-account { display: flex; align-items: center; gap: 11px; padding: 13px 16px; border: 1px solid hsl(var(--border)); border-radius: 13px; background: #fbfcfc; color: hsl(var(--foreground)); text-decoration: none; font-weight: 800; font-size: .85rem; transition: border-color .2s ease, background .2s ease; }
-.ig-account span { flex: 1; text-align: left; }
-.ig-account svg:first-child { color: #c13584; }
-.ig-account:hover { border-color: #c13584; background: #fdeef4; }
-.ig-skip { border: 0; background: transparent; color: hsl(var(--muted-foreground)); font-size: .76rem; font-weight: 700; cursor: pointer; padding: 6px; }
-.ig-skip:hover { color: hsl(var(--foreground)); }
-
 /* Delivery details block inside the assessment info form */
 .delivery-block { margin-top: 4px; padding: 20px; border: 1px solid hsl(var(--border)); border-radius: 18px; background: rgba(255,255,255,.66); display: grid; gap: 16px; }
 .delivery-head { display: flex; gap: 11px; align-items: flex-start; color: hsl(var(--primary)); }

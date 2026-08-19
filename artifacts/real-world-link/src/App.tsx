@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ArrowLeft, ArrowRight, ArrowUp, Brain, BriefcaseBusiness, Check, CheckCircle2, ChevronDown, CircleHelp, ClipboardCheck, Copy, Cpu, FlaskConical, Gauge, Globe2, GraduationCap, Instagram, Lightbulb, Menu, Package, Radar, Scale, Search, Send, ShieldCheck, Sparkles, Target, Users, X, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUp, Brain, BriefcaseBusiness, Check, CheckCircle2, ChevronDown, CircleHelp, ClipboardCheck, Copy, Cpu, FlaskConical, Gauge, Globe2, GraduationCap, Lightbulb, Menu, Package, Radar, Scale, Search, Send, ShieldCheck, Sparkles, Target, Users, X, Zap } from 'lucide-react';
 import { Link, Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -131,7 +131,6 @@ function Home() {
     <footer className="footer"><div className="container-rwl footer-grid"><div><Brand inverse /><p>A thoughtful space for students to understand their interests and explore possible skill directions.</p></div><div><h4>Explore</h4><div className="footer-links"><a href="#how-it-works">How It Works</a><a href="#career-fields">Skill Fields</a><a href="#faq">FAQ</a><a href="#contact">Contact</a></div></div><div><h4>Read</h4><div className="footer-links"><Link href="/privacy">Privacy Policy</Link><Link href="/terms">Terms &amp; Conditions</Link><Link href="/assessment">Start Assessment</Link><Link href="/track" data-testid="link-footer-track">Track My Linking Box</Link></div></div></div><div className="container-rwl footer-bottom"><span>© {new Date().getFullYear()} Real World Link</span><span>In Shorts by Aafiya &amp; Sana</span></div></footer>
      <button className={`back-top ${showTop ? '' : 'hidden'}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top" data-testid="button-back-top"><ArrowUp size={17} /></button>
     {selectedField && <CareerModal field={selectedField} onClose={() => setSelectedField(null)} />}
-    <InstagramPopup />
   </div>;
 }
 
@@ -205,52 +204,6 @@ function AssessmentPage() {
     {stage === 'result' && result && <div className="assessment-page reveal"><div className="eyebrow">Based on your responses</div><h1>Your best-fit skill field.</h1><p>This is a possible direction to explore — a starting point for your next conversation, not a guarantee about your future.</p><div className="result-card"><span className="result-badge">Best-fit skill field</span><h2>{result.primary}</h2><p>{stream && streamDetails[stream].field.description} Your answers suggest that this kind of work may be worth learning more about.</p><div className="secondary-result">Another possible direction to explore: <strong>{result.secondary}</strong></div></div><div className="assessment-actions"><Link href="/" className="button-secondary" data-testid="link-result-home">Return to home</Link><button className="button-primary" onClick={() => setStage('thankyou')} data-testid="button-result-next">See your next step <ArrowRight size={16} /></button></div></div>}
     {stage === 'thankyou' && <div className="assessment-intro reveal"><div className="thankyou-mark"><Check size={36} /></div><div className="eyebrow">You made a meaningful start</div><h1>Thank you, {student.name.split(' ')[0] || 'student'}.</h1><p>Your responses have been received and your Linking Box is being prepared for {student.address ? `${student.city}` : 'you'}. We have emailed your tracking code — you can follow your box from your dashboard.</p>{trackingCode && <TrackingCodeCard code={trackingCode} />}<div className="assessment-actions" style={{ justifyContent: 'center' }}>{trackingCode && <Link href={`/track?code=${encodeURIComponent(trackingCode)}`} className="button-primary" data-testid="link-thankyou-track"><Package size={16} /> Track my Linking Box</Link>}<Link href="/" className="button-secondary" data-testid="link-thankyou-home">Explore Real World Link <ArrowRight size={16} /></Link></div></div>}
   </main></div>;
-}
-
-const INSTAGRAM_ACCOUNTS = ['the.mufad', 'nihal.ceo'];
-const INSTAGRAM_PROMPT_KEY = 'rwl_instagram_prompt';
-
-// Shown once per visitor, shortly after the home page settles. Dismissal is
-// remembered so a returning student is not asked again.
-function InstagramPopup() {
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    if (window.localStorage.getItem(INSTAGRAM_PROMPT_KEY)) return;
-    const timer = window.setTimeout(() => setOpen(true), 1200);
-    return () => window.clearTimeout(timer);
-  }, []);
-  const close = () => {
-    window.localStorage.setItem(INSTAGRAM_PROMPT_KEY, 'seen');
-    setOpen(false);
-  };
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') close(); };
-    document.addEventListener('keydown', onKey);
-    document.body.style.overflow = 'hidden';
-    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
-  }, [open]);
-  if (!open) return null;
-  return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
-    <div className="ig-modal" role="dialog" aria-modal="true" aria-labelledby="ig-modal-title">
-      <button className="modal-close" onClick={close} aria-label="Close" data-testid="button-close-instagram"><X size={18} /></button>
-      <div className="ig-laugh" role="img" aria-label="Laughing face" data-testid="emoji-laugh">😂</div>
-      <div className="eyebrow section-kicker">Before you start</div>
-      <h2 id="ig-modal-title">Follow us on Instagram.</h2>
-      <p>We share student stories, skill ideas and what goes into every Linking Box. Give us a follow so you do not miss it.</p>
-      <div className="ig-actions">
-        {INSTAGRAM_ACCOUNTS.map((handle) => <a
-          className="ig-account"
-          href={`https://www.instagram.com/${handle}/`}
-          target="_blank"
-          rel="noreferrer"
-          key={handle}
-          data-testid={`link-instagram-${handle}`}
-        ><Instagram size={17} /><span>@{handle}</span><ArrowUp size={15} style={{ transform: 'rotate(45deg)' }} /></a>)}
-      </div>
-      <button className="ig-skip" type="button" onClick={close} data-testid="button-skip-instagram">Maybe later</button>
-    </div>
-  </div>;
 }
 
 function TrackingCodeCard({ code }: { code: string }) {
