@@ -120,8 +120,8 @@ export const careerProfiles: Record<string, CareerProfile> = {
 };
 
 export const boxSteps = [
-  { key: 'preparing', label: 'Assessed', copy: 'Your responses are in and your career field is set.' },
-  { key: 'designed', label: 'Designed', copy: 'Your Linking Box has been packed for your career field.' },
+  { key: 'preparing', label: 'Assessed', copy: 'Your responses are in and your skill field is set.' },
+  { key: 'designed', label: 'Designed', copy: 'Your Linking Box has been packed for your skill field.' },
   { key: 'dispatched', label: 'Dispatched', copy: 'Your box has left our workshop and is on its way.' },
   { key: 'delivered', label: 'Delivered', copy: 'Your box has arrived. Your practical challenge is ready.' },
 ] as const;

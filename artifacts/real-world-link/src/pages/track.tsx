@@ -213,7 +213,7 @@ function DashboardView({
 
       {/* Career profile */}
       <section className="dash-card">
-        <h2 className="dash-card-title">Your career field</h2>
+        <h2 className="dash-card-title">Your skill field</h2>
         {data.result ? (
           <>
             <div className="dash-result">{data.result}</div>
